@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe Assistant for Cookpad</title>
+  <link rel="stylesheet" href="reset.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="site-title">
+        <h1>Recipe Assistant <span class="title-break">for Cookpad</span></h1>
+      </div>
+      <!-- Wide screen menu -->
+      <nav class="wide-screen-menu">
+        <ul class="header-buttons">
+          <li id="loginButton">ログイン</li>
+          <li id="registerButton">アカウントを作る</li>
+        </ul>
+      </nav>
+      <!-- Narrow screen menu -->
+      <div class="narrow-screen-menu">
+        <button id="hamburgerButton">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="30px" height="30px">
+            <path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/>
+          </svg>
+        </button>
+        <div id="hamburgerMenu" class="hamburger-menu">
+          <div class="menu-header">
+            <button id="closeMenuButton">×</button>
+          </div>
+          <ul>
+            <li id="hamburgerRegisterLink">アカウントを作る</li>
+            <li id="hamburgerLoginLink">ログイン</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="container">
+    <div class="toggle-container">
+      <div class="toggle-wrapper">
+        <label class="switch">
+          <input type="checkbox" id="vegetarianMode">
+          <span class="slider round"></span>
+        </label>
+        <label for="vegetarianMode">Vegetarian Mode</label>
+      </div>
+      <p id="vegetarianDescription" class="vegetarian-description">肉、魚介類等も含めた全ての代用品が提示されます</p>
+    </div>
+    <div class="search-container">
+      <input type="text" id="urlInput" placeholder="https://cookpad.com/jp/recipes/...">
+      <button id="fetchRecipe">送信</button>
+      <p class="input-instruction">クックパッドのURLを入力してください</p>
+    </div>
+    <p id="errorMessage" class="error-message"></p>
+    <div id="recipe">
+      <div class="recipe-name-box">
+        <h1 id="recipeName"></h1>
+      </div>
+      <div class="recipe-content">
+        <div class="ingredients">
+          <div class="ingredients-header">
+            <h2>材料</h2>
+            <input type="checkbox" id="checkAll" class="check-all-button" style="display: none;">
+          </div>
+          <div class="ingredients-content">
+            <!-- Ingredients will be dynamically added here -->
+            <div id="servingsInfo"></div>
+            <ul id="ingredientList"></ul>
+          </div>
+          <div class="ingredients-footer">
+            <button id="searchSubstitutesButton" style="display: none;">代用品を探す</button>
+          </div>
+        </div>
+        <div class="steps-advice-container">
+          <div class="steps">
+            <h2>作り方</h2>
+            <!-- Steps will be dynamically added here -->
+            <ol id="stepList"></ol>
+          </div>
+          <div class="advice">
+            <h2>コツ・ポイント</h2>
+            <!-- Advice will be dynamically added here -->
+            <div id="adviceInfo"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals for registration, login, and logout -->
+    <!-- Registration Form -->
+    <div id="registerModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeRegisterModal">&times;</span>
+        <!-- Registration form content -->
+        <div class="site-title">
+          <h1>Recipe Assistant <span class="title-break">for Cookpad</span></h1>
+        </div>
+        <p>アカウントを作成してください。</p>
+        <form id="registerForm">
+          <label for="registerEmail">メールアドレス</label>
+          <input type="email" id="registerEmail" placeholder="mailaddress@recipe.com" required>
+          <span class="error-message" id="registerEmailError"></span>
+          <p class="warning-text">アカウント作成で入力されたメールアドレスは、アカウント認証以外のいかなる目的でも使用しません。</p>
+          <label for="registerPassword">パスワード</label>
+          <input type="password" id="registerPassword" placeholder="************" required>
+          <span class="error-message" id="registerPasswordError"></span>
+          <p>8文字以上で、大文字、小文字、数字を含めて入力してください</p>
+          <p class="warning-text">試作サイトのため、パスワードのリセット機能は備えておりません。<br>パスワードを忘れた場合は、適当なメールアドレスでアカウントを作成し直してください。</p>
+          <button type="submit" class="submit-button">登録</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeLoginModal">&times;</span>
+        <!-- Login form content -->
+        <div class="site-title">
+          <h1>Recipe Assistant <span class="title-break">for Cookpad</span></h1>
+        </div>
+        <p>本サイトのアカウントでログインしてください。</p>
+        <p>アカウントをお持ちでない方は、<a href="#" id="redirectToRegister">こちらからご登録</a>いただけます。</p>
+        <form id="loginForm">
+          <label for="loginEmail">メールアドレス</label>
+          <input type="email" id="loginEmail" placeholder="mailaddress@recipe.com" required>
+          <span class="error-message" id="emailError"></span>
+          <label for="loginPassword">パスワード</label>
+          <input type="password" id="loginPassword" placeholder="************" required>
+          <span class="error-message" id="passwordError"></span>
+          <p>8文字以上で、大文字、小文字、数字を含めて入力してください</p>
+          <p class="warning-text">試作サイトのため、パスワードのリセット機能は備えておりません。<br>パスワードを忘れた場合は、適当なメールアドレスでアカウントを作成し直してください。</p>
+          <button type="submit" class="submit-button">ログイン</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div id="logoutModal" class="modal">
+      <div class="modal-content" id="logoutModalContent">
+        <span id="closeLogoutModal" class="close">&times;</span>
+        <!-- Logout modal content -->
+        <p>ログアウトしますか？</p>
+        <button id="confirmLogoutButton">ログアウト</button>
+        <button id="cancelLogoutButton">キャンセル</button>
+      </div>
+    </div>
+  
+  <!-- Modal for selecting a substitute -->
+  <div id="substituteModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>代用品を選択してください</h2>
+      <form id="substituteForm">
+        <ul id="substituteList"></ul>
+        <button type="button" id="selectSubstitute">決定</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+</html>

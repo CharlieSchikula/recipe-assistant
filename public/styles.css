@@ -1,0 +1,863 @@
+
+/* basic styles */
+body {
+  background-color: white;
+  font-family: noto-sans,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,arial,sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  font-variation-settings: normal;
+  text-rendering: optimizeLegibility;
+  tab-size: 4;
+  font-size: 1rem;
+  letter-spacing: -.025em;
+  line-height: 1.5rem;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "liga" on;
+}
+
+.container {
+  margin: 0 auto;
+  padding: 20px;
+  max-width: 96%;
+}
+
+h1 {
+  line-height: 2.5rem;
+  text-align: center;
+}
+
+h2 {
+  padding: 0 0 10px 0;
+}
+
+button, input[type="submit"] {
+  cursor: pointer;
+}
+
+/* Hide the wide-screen-menu on narrow screens */
+@media (max-width: 768px) {
+  .wide-screen-menu {
+    display: none;
+  }
+}
+
+/* Hide the hamburger-menu on wide screens */
+@media (min-width: 769px) {
+  .narrow-screen-menu {
+    display: none;
+  }
+}
+
+/* Header styles */
+header {
+  color: black;
+  border-bottom: 4px solid darkcyan;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding: 0
+}
+
+.site-title {
+  margin: 20px 0px 20px 50px;
+  }
+
+.site-title h1 {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-family: 'Pacifico', cursive;
+}
+
+.title-break {
+  display: block; /* Force line break */
+  color: #FF9933;
+  font-size: 1.5rem;
+  font-style: italic;
+}
+
+.wide-screen-menu ul {
+  display: flex;
+  gap: 5px; /* Add some space between the buttons */
+  position: absolute;
+  top: 25px;
+  right: 15px;
+  list-style-type: none;
+  align-items: center;
+}
+
+#loginButton, #logoutButton, #registerButton, .submit-button {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  z-index: 1000;
+  margin: 10px;
+}
+
+#loginButton, #logoutButton {
+  color: darkcyan;
+  border: 2px solid darkcyan;
+}
+
+#loginButton:hover, #logoutButton:hover {
+  background-color: #dddddd;
+}
+
+#registerButton, .submit-button {
+  background-color: darkcyan;
+  color: white;
+  border: 2px solid darkslategray;
+}
+
+#registerButton:hover, .submit-button:hover {
+  background-color: #007b7f;
+}
+
+#hamburgerButton {
+  position: absolute;
+  bottom: 20px;
+  right: 5px;
+  padding: 8px 8px;
+  cursor: pointer;
+  font-size: 2rem;
+  font-weight: bold;
+  background-color: transparent;
+  border: none;
+  color: #222222;
+  z-index:100;
+}
+
+.hamburger-menu {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 100%;
+  font-size: 1.25rem;
+  line-height: 3rem;
+  background-color: white;
+  border-left: 2px solid #606060;
+  padding: 10px;
+  transform: translateX(100%); /* Start off-screen to the right */
+  transition: transform 0.3s ease; /* Add transition for sliding effect */
+  z-index: 500;
+}
+
+.hamburger-menu.open {
+  display: block;
+  transform: translateX(0); /* Slide in from the right */
+  transition: transform 0.3s ease; /* Add transition for sliding effect */
+}
+
+.menu-header {
+  display: flex;
+  justify-content: flex-end; /* Align the close button to the right */
+}
+
+#closeMenuButton {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.hamburger-menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.hamburger-menu ul li a {
+  text-decoration: none;
+  color: #222222;
+}
+
+.hamburger-menu ul li a#logoutLink {
+  color: gray;
+}
+
+.hamburger-menu ul li#hamburgerRegisterLink,
+.hamburger-menu ul li#hamburgerLoginLink {
+  cursor: pointer;
+}
+
+.hamburger-menu hr {
+  border: none;
+  border-top: 4px solid darkcyan; /* Set the horizontal line to dark cyan */
+  margin: 10px 0;
+}
+
+/* Modal styles */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 2000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 620px;
+  border-radius: 8px;
+}
+
+.modal-content p {
+  margin: 10px 0;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+/* Login and Register form styles */
+#loginForm, #registerForm {
+  display: flex;
+  flex-direction: column;
+}
+
+#loginForm label, #registerForm label {
+  margin-top: 10px;
+}
+
+#loginForm input, #registerForm input {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  display: none; /* Hidden by default */
+}
+
+.warning-text {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 10px;
+}
+
+
+/* Logout modal styles */
+#logoutModal .modal-content {
+  max-width: 400px; /* Maximum width for the logout modal */
+  text-align: center; /* Center-align text and buttons */
+}
+
+#logoutModal p {
+  margin-bottom: 20px;
+}
+
+#confirmLogoutButton {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  margin: 10px;
+  background-color: darkcyan;
+  color: white;
+  border: 2px solid darkslategray;
+}
+
+#confirmLogoutButton:hover {
+  background-color: #007b7f;
+}
+
+#cancelLogoutButton {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin: 10px;
+  border: 2px solid darkslategray;
+}
+
+#cancelLogoutButton:hover {
+  background-color: #dddddd;
+}
+
+
+/* Vegetarian Mode */
+.toggle-container {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: flex-start; /* Align items to the left */
+  margin-bottom: 10px;
+}
+
+.toggle-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Distribute space between toggle and description */
+  width: 100%; /* Ensure it takes the full width */
+}
+
+.vegetarian-description {
+  font-size: 0.9rem;
+  text-align: right;
+  color: #555;
+  margin-left: auto; /* Push the description to the right end */
+  margin-top: 5px; /* Add some space above the text */
+  margin-bottom: 15px;
+}
+
+
+/* Vegetarian Mode Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  margin-right: 10px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: darkcyan;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+
+/* search window */
+.search-container {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the container horizontally */
+  margin-bottom: 10px;
+  max-width: 970px;
+  margin: 25px auto; /* Center the container within its parent */
+  flex-wrap: wrap; /* Allow wrapping for narrow displays */
+}
+
+#urlInput {
+  flex: 1;
+  margin-right: 5px;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  height: 40px;
+  max-width: calc(100% - 65px); /* Adjust width dynamically */
+}
+
+#fetchRecipe {
+  padding: 5px 5px;
+  border: 1px solid #ccc;
+  border-left: none;
+  background-color: darkcyan;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  height: 40px;
+  min-width: 65px; /* Set a fixed width for the button */
+  font-weight: bold; /* Ensure the font is bold */
+}
+
+#fetchRecipe:hover {
+  background-color: #007b7f;
+}
+
+.input-instruction {
+  flex-basis: 100%; /* Ensure the text takes the full width */
+  text-align: left;
+  margin: 10px 0 0 10px; /* Add some space above the text */
+  font-size: 14px;
+  color: #555;
+}
+
+
+/* error message style */
+.error-text {
+  color: red;
+  font-weight: bold;
+}
+
+
+/* Recipe Name */
+#recipe {
+  margin-top: 20px;
+}
+
+.recipe-name-box {
+  margin-bottom: 20px;
+  margin-left: 1rem;
+}
+
+.recipe-name-box h1 {
+  font-size: 2rem;
+  color: darkslategray;
+} 
+
+
+/* layout for recipe contents */
+.ingredients, .steps, .advice {
+  margin-bottom: 20px;
+  padding: 20px 25px;
+  /* 最後に消す */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  /* 最後に消す */
+  background-color: #fff;
+  min-height: 85px; /* Set a minimum height for consistency */
+}
+
+.ingredients h2, .steps h2, .advice h2 {
+  color: darkslategray;
+}
+
+.ingredients p, .advice p {
+  margin: 10px 0;
+}
+
+
+/* ingredients */
+#checkAll {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 20px;
+  height: 20px;
+  accent-color: gray;
+  cursor: pointer;
+}
+
+#checkAll:checked {
+  accent-color: rgb(0, 120, 255);
+}
+
+#searchSubstitutesButton {
+  margin-top: 30px;
+  padding: 10px 20px;
+  background-color: darkcyan;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+#searchSubstitutesButton:hover {
+  background-color: #007b7f;
+}
+
+.ingredients ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.ingredients ul li[class*="headline"]:not([class*="not-headline"]) {
+  margin-top: 24px;
+  padding: 8px 0;
+}
+
+.ingredients ul li[class*="not-headline"] {
+  border-bottom: 1px dotted #ccc; /* Apply dotted border only to not-headline */
+  padding: 8px 0;
+  display: flex;
+  align-items: left;
+  flex-direction: column;
+}
+
+.ingredients ul li input[type="checkbox"] {
+  margin-right: 10px; /* Add space between the checkbox and the text */
+  accent-color: gray;
+}
+
+.ingredients ul li input[type="checkbox"]:checked {
+  accent-color: rgb(0, 120, 255);
+}
+
+.ingredient-name {
+  flex: 1; /* Allow the ingredient name to take up available space */
+  margin-right: 10px; /* Add space between the ingredient name and quantity */
+}
+
+.ingredient-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ingredient-quantity {
+  margin-left: auto;
+  text-align: right;
+}
+
+
+/* substitutes */
+.substitute-container {
+  margin-top: 5px;
+  margin-left: 20px;
+  padding-left: 20px;
+  background-color: #f0f8ff;
+  border-left: 3px solid darkcyan;
+  font-weight: 700;
+}
+
+.no-substitutes-message {
+  color: gray;
+  font-style: italic;
+  margin-top: 5px;
+}
+
+.clickable-text {
+  cursor: pointer;
+  color: blue;
+  text-decoration: underline;
+}
+
+.ingredient-name-styled {
+  color: darkslategray;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.substitute-name {
+  color: darkgreen;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.portion {
+  color: #691c23;
+  text-decoration: underline dotted;
+}
+
+.veg-box {
+  border: 1px solid #4CAF50;
+  border-radius: 5px;
+  padding: 2px 5px;
+  margin-left: 10px;
+  display: inline-block;
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+#selectSubstitute {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: darkcyan;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#selectSubstitute:hover {
+  background-color: #007b7f;
+}
+
+#substituteList {
+  list-style-type: none;
+  padding-top: 10px;
+}
+
+#substituteList li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#substituteList li label {
+  margin-left: 10px;
+}
+
+/* steps */
+.steps ol {
+  counter-reset: step-counter; /* Initialize the counter */
+  box-sizing: border-box;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+  gap: 1rem;
+  display: grid;
+  --tw-space-y-reverse: 0;
+  margin-bottom: calc(1rem*var(--tw-space-y-reverse));
+  margin-top: calc(1rem*(1 - var(--tw-space-y-reverse)));
+}
+
+.steps ol p {
+  margin-top: 0;
+}
+
+.steps ol li {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.steps ol li::before {
+  content: counter(step-counter);
+  counter-increment: step-counter;
+  position: absolute;
+  left: 0;
+  top: 0.2rem;
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 50%;
+  background-color: darkcyan;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 0 solid;
+  box-sizing: border-box;
+  flex-direction: column;
+  place-content: center;
+  place-items: center;
+  font-size: .875rem;
+  letter-spacing: -.2px;
+  line-height: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .no-steps-message {
+    white-space: normal; /* Allow text wrapping on narrow displays */
+  }
+
+  .steps ol {
+    display: block; /* Change to block layout for narrow displays */
+  }
+
+  .steps ol li::before {
+    height: 1.25rem;
+    width: 1.25rem;
+    font-size: .75rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .no-steps-message {
+    white-space: nowrap; /* Prevent text wrapping on wider displays */
+  }
+
+  .steps ol li {
+    flex-direction: column; /* Display images and text in a column on wider displays */
+  }
+}
+
+
+/* images in steps */
+.image-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Adjust the gap between images as needed */
+  position: relative; /* Ensure the pseudo-element is positioned relative to the container */
+}
+
+.image-container img {
+  max-width: 160px;
+  height: auto;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .steps ol li {
+    display: flex;
+    flex-direction: column; /* Flex column on narrow screens */
+  }
+
+  .steps ol li img {
+    order: 1; /* Display images below text on narrow screens */
+    margin: 10px 0;
+  }
+
+  .image-container {
+    flex-direction: row; /* Display images side by side on narrow screens */
+  }
+
+  .image-container img {
+    display: block; /* Ensure all images are displayed */
+  }
+}
+
+@media (min-width: 769px) {
+  .steps ol li {
+    display: flex;
+    flex-direction: column; /* Flex column on wide screens */
+  }
+
+  .steps ol li img {
+    order: -1; /* Display images above text on wide screens */
+    margin-bottom: 10px;
+  }
+
+  .image-container {
+    flex-direction: row; /* Display images side by side on wide screens */
+  }
+
+  .image-container img {
+    display: none; /* Hide all images initially */
+    max-width: 240px; /* Increase the max-width for wide screens */
+    width: 100%; /* Ensure the image takes up the full width */
+  }
+
+  .image-container img:first-child {
+    display: block; /* Display only the first image */
+  }
+ 
+  .left-arrow,
+  .right-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer; /* Change cursor to pointer on hover */
+    z-index: 1; /* Ensure the arrows are above the images */
+    user-select: none; /* Prevent text selection */
+  }
+
+  .left-arrow {
+    left: 10px;
+  }
+
+  .right-arrow {
+    right: 10px;
+  }
+  
+  .image-indicators {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+  }
+
+  .image-indicator {
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    border-radius: 50%;
+    border: 1px solid darkslategray;
+  }
+
+  .image-indicator.active {
+    background-color: darkslategray;
+  }
+}
+
+@media (min-width: 970px) {
+  .recipe-content {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .ingredients {
+    flex: 0 0 324px; /* Fixed width of 268px */
+    padding: 20px 10px 20px 25px; /* Adjust padding for better appearance */
+    margin-right: 20px; /* Add space between ingredients and steps-advice-container */
+    display: flex;
+    flex-direction: column;
+    height: auto; /* Allow the height to adjust based on content */
+    max-height: 95vh; /* Set maximum height to viewport height */
+    position: relative; /* Ensure the button is positioned relative to this container */
+  }
+
+  .ingredients-header {
+    position: sticky;
+    top: 0;
+    background-color: white; /* Ensure the background covers content behind */
+    z-index: 1; /* Ensure it stays above other content */
+    padding: 10px 0; /* Add some padding for better appearance */
+  }
+
+  .ingredients-content {
+    flex: 1; /* Allow the content to take up remaining space */
+    overflow-y: auto; /* Make the content scrollable if it overflows */
+    padding-right: 10px; /* Add padding between content and scroll bar */
+  }
+
+  #findSubstitutesButton {
+    position: sticky;
+    bottom: 0; /* Stick to the bottom of the container */
+    left: 0;
+    width: calc(100% - 25px); /* Full width of the container minus 25px */
+    padding: 10px 20px;
+  }
+
+  .steps-advice-container {
+    flex: 1; /* Take up remaining space */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .steps {
+    margin-bottom: 20px; /* Add some space between steps and advice */
+  }
+}
