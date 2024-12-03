@@ -405,7 +405,7 @@ export function setupFetchRecipe() {
         noStepsMessage.classList.add('error-text', 'no-steps-message');
         stepList.appendChild(noStepsMessage);
       } else {
-        data.steps.forEach(step => {
+        data.steps.forEach((step, stepIndex) => {
           const li = document.createElement('li');
           li.classList.add('step-item'); // Add step-item class
 
@@ -423,52 +423,53 @@ export function setupFetchRecipe() {
             img.src = imageSrc;
             img.alt = 'Step image';
             img.style.maxWidth = '100%';
+            img.dataset.step = stepIndex; // Assign data-step attribute
             imageContainer.appendChild(img);
           });
 
           li.appendChild(imageContainer);
           li.appendChild(stepText);
           stepList.appendChild(li);
-
         });
 
-        // Apply styles based on screen width
-        applyStylesToStepImg();
-      }
+      // Apply styles based on screen width
+      applyStylesToStepImg();
+    }
 
-      // Display advice
-      if (!data.advice) {
-        const noAdviceMessage = document.createElement('p');
-        noAdviceMessage.textContent = 'アドバイスが見つかりませんでした。';
-        noAdviceMessage.classList.add('error-text');
-        adviceInfo.appendChild(noAdviceMessage);
-      } else {
-        adviceInfo.innerHTML = data.advice; // Set the innerHTML to handle multiple <p> tags
-      }
+    // Display advice
+    if (!data.advice) {
+      const noAdviceMessage = document.createElement('p');
+      noAdviceMessage.textContent = 'アドバイスが見つかりませんでした。';
+      noAdviceMessage.classList.add('error-text');
+      adviceInfo.appendChild(noAdviceMessage);
+    } else {
+      adviceInfo.innerHTML = data.advice; // Set the innerHTML to handle multiple <p> tags
+    }
 
-      // Turn off the Check All button
-      document.getElementById('checkAll').checked = false;
+    // Turn off the Check All button
+    document.getElementById('checkAll').checked = false;
 
-      // Add event listeners to new images
-      addImageEventListeners();
-    } catch(error)  {
+    // Add event listeners to new images
+    addImageEventListeners();
+    } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
       alert('レシピの取得に失敗しました。URLを確認してください。');
     }
   });
 }
 
+
 export function setupSearchSubstitutes() {
-  // Add event listener for Vegetarian Mode checkbox
-  document.getElementById('vegetarianMode').addEventListener('change', () => {
-    const vegetarianMode = document.getElementById('vegetarianMode').checked;
-    const description = document.getElementById('vegetarianDescription');
-    if (vegetarianMode) {
-      description.textContent = '肉、魚介類、卵、乳製品を含む代用品が提示されません';
-    } else {
-      description.textContent = '肉、魚介類等も含めた全ての代用品が提示されます';
-    }
-  });
+// Add event listener for Vegetarian Mode checkbox
+document.getElementById('vegetarianMode').addEventListener('change', () => {
+  const vegetarianMode = document.getElementById('vegetarianMode').checked;
+  const description = document.getElementById('vegetarianDescription');
+  if (vegetarianMode) {
+    description.innerHTML = '肉、魚介類、卵、乳製品を含む<br>代用品が提示されません';
+  } else {
+    description.innerHTML = '肉、魚介類等も含め<br>全ての代用品が提示されます';
+  }
+});
 
   // Add event listener for search Substitutes button
   document.getElementById('searchSubstitutesButton').addEventListener('click', () => {

@@ -1,9 +1,9 @@
 // Apply styles to each step based on the number of images in the step
 export function applyStylesToStepImg() {
   const stepList = document.getElementById('stepList');
-  const steps = stepList.querySelectorAll('.step-item');
+  const steps = Array.from(stepList.querySelectorAll('.step-item')); // Convert NodeList to Array
 
-  steps.forEach(step => {
+  steps.forEach((step) => {
     const imageContainer = step.querySelector('.image-container');
     const images = imageContainer.querySelectorAll('img');
 

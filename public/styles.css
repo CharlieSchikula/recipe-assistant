@@ -242,7 +242,7 @@ header {
 }
 
 #imageModal img {
-  max-width: min(450px, 100%); /* Set max width to 450px or 100%, whichever is smaller */
+  max-width: min(480px, 100%); /* Set max width to 450px or 100%, whichever is smaller */
   vertical-align: middle;
   max-height: 80vh; /* Ensure the image fits within the viewport height */
 }
@@ -380,7 +380,7 @@ header {
 .toggle-container {
   display: flex;
   flex-direction: column; /* Stack items vertically */
-  align-items: flex-start; /* Align items to the left */
+  align-items: flex-end; /* Align items to the left */
   margin-bottom: 10px;
 }
 
@@ -393,7 +393,7 @@ header {
 
 .vegetarian-description {
   font-size: 0.9rem;
-  text-align: right;
+  text-align: center;
   color: #555;
   margin-left: auto; /* Push the description to the right end */
   margin-top: 5px; /* Add some space above the text */
@@ -407,7 +407,7 @@ header {
   display: inline-block;
   width: 50px;
   height: 28px;
-  margin-right: 10px;
+  margin-left: 10px;
 }
 
 .switch input {
@@ -856,7 +856,14 @@ input:checked + .slider:before {
   .right-arrow {
     right: 10px;
   }
-  
+
+  /* Hide arrows on narrow screens */
+  @media (max-width: 768px) {
+    .bi {
+      display: none;
+    }
+  }
+
   .image-indicators {
     position: absolute;
     bottom: 10px;
