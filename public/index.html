@@ -18,6 +18,7 @@
         <ul class="header-buttons">
           <li id="loginButton">ログイン</li>
           <li id="registerButton">アカウントを作る</li>
+          <li id="logoutButton">ログアウト</li>
         </ul>
       </nav>
       <!-- Narrow screen menu -->
@@ -34,6 +35,7 @@
           <ul>
             <li id="hamburgerRegisterLink">アカウントを作る</li>
             <li id="hamburgerLoginLink">ログイン</li>
+            <li id="hamburgerLogoutLink">ログアウト</li>
           </ul>
         </div>
       </div>
@@ -91,7 +93,7 @@
     </div>
   </div>
 
-  <!-- Modals for registration, login, and logout -->
+  <!-- Modals -->
     <!-- Registration Form -->
     <div id="registerModal" class="modal">
       <div class="modal-content">
@@ -139,18 +141,17 @@
         </form>
       </div>
     </div>
-
-    <!-- Logout Modal -->
-    <div id="logoutModal" class="modal">
-      <div class="modal-content" id="logoutModalContent">
-        <span id="closeLogoutModal" class="close">&times;</span>
-        <!-- Logout modal content -->
-        <p>ログアウトしますか？</p>
-        <button id="confirmLogoutButton">ログアウト</button>
-        <button id="cancelLogoutButton">キャンセル</button>
-      </div>
+    
+  <!-- Logout Modal -->
+  <div id="logoutModal" class="modal">
+    <div class="modal-content" id="logoutModalContent">
+      <span class="close" id="closeLogoutModal">&times;</span>
+      <p>ログアウトしますか？</p>
+      <button id="confirmLogoutButton">ログアウト</button>
+      <button id="cancelLogoutButton">キャンセル</button>
     </div>
-  
+  </div>
+
   <!-- Modal for selecting a substitute -->
   <div id="substituteModal" class="modal">
     <div class="modal-content">
@@ -163,6 +164,12 @@
     </div>
   </div>
 
-  <script src="scripts.js"></script>
+  <!-- Expanded Image Modal -->
+  <div id="expandedImageModal" class="expanded-image-modal">
+    <span id="closeExpandedImage" class="expanded-image-close">&times;</span>
+    <img class="expanded-image-modal-content" id="expandedImage">
+  </div>
+
+  <script src="scripts/main.js" type="module"></script>
 </body>
 </html>

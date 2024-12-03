@@ -30,6 +30,13 @@ h2 {
   padding: 0 0 10px 0;
 }
 
+/* Ensure images have a high enough z-index */
+img {
+  cursor: pointer;
+  z-index: 10; /* Adjust the z-index as needed */
+  position: relative; /* Ensure z-index takes effect */
+}
+
 button, input[type="submit"] {
   cursor: pointer;
 }
@@ -119,6 +126,10 @@ header {
   background-color: #007b7f;
 }
 
+#logoutButton {
+  display: none;
+}
+
 #hamburgerButton {
   position: absolute;
   bottom: 20px;
@@ -176,16 +187,19 @@ header {
 .hamburger-menu ul li a {
   text-decoration: none;
   color: #222222;
+  cursor: pointer;
 }
 
-.hamburger-menu ul li a#logoutLink {
+#hamburgerLoginLink, #hamburgerRegisterLink, #hamburgerLogoutLink {
+  cursor: pointer;
+}
+
+#hamburgerLogoutLink {
+  display: none;
   color: gray;
 }
 
-.hamburger-menu ul li#hamburgerRegisterLink,
-.hamburger-menu ul li#hamburgerLoginLink {
-  cursor: pointer;
-}
+
 
 .hamburger-menu hr {
   border: none;
@@ -308,6 +322,47 @@ header {
   background-color: #dddddd;
 }
 
+/* Styles for the expanded image modal */
+.expanded-image-modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.7); /* Transparent gray background */
+}
+
+.expanded-image-modal-content {
+  margin: auto;
+  display: block;
+  max-width: 90%; /* 90% display width on narrow screens */
+}
+
+@media (min-width: 769px) {
+  .expanded-image-modal-content {
+    max-width: 690px; /* 690px on wide screens */
+  }
+}
+
+.expanded-image-close {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #fff;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.expanded-image-close:hover,
+.expanded-image-close:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
 
 /* Vegetarian Mode */
 .toggle-container {
@@ -778,7 +833,7 @@ input:checked + .slider:before {
     align-items: center;
     justify-content: center;
     cursor: pointer; /* Change cursor to pointer on hover */
-    z-index: 1; /* Ensure the arrows are above the images */
+    z-index: 20; /* Ensure the arrows are above the images */
     user-select: none; /* Prevent text selection */
   }
 
@@ -797,6 +852,7 @@ input:checked + .slider:before {
     transform: translateX(-50%);
     display: flex;
     gap: 5px;
+    z-index: 20;
   }
 
   .image-indicator {

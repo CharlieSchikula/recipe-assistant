@@ -1,266 +1,14 @@
+import { closeExpandedImage } from './imageExpansion.js';
+import { handleLogout } from './applyLoggedInStyles.js';
+import { displaySubstitutes } from './substitutes.js';
+import { validateEmail, validatePassword } from './validateEmailAndPassword.js';
+import { applyStylesToStepImg } from './applyStylesToStepImg.js';
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Function to check if the user is logged in
-  function isLoggedIn() {
-    const token = localStorage.getItem('token');
-    return token !== null;
-  }
+  setupModals();
+});
 
-  // Function to handle logout
-  function handleLogout() {
-    localStorage.removeItem('token');
-    window.location.reload(); // Reload the page to update the menu
-  }
-
-  // Function to get the user's email from the token
-  function getUserEmail() {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.email;
-    } catch (e) {
-      console.error('Error parsing token:', e);
-      return null;
-    }
-  }
-
-  // Function to render the wide screen menu for logged in users
-  function renderWideScreenMenu() {
-    const registerButton = document.getElementById('registerButton');
-    const loginButton = document.getElementById('loginButton');
-    const wideScreenMenu = document.querySelector('.wide-screen-menu ul');
-
-    if (isLoggedIn()) {
-      const email = getUserEmail();
-      console.log('Email:', email); // Debugging log
-      if (email) {
-        registerButton.style.display = 'none';
-        loginButton.style.display = 'none';
-        wideScreenMenu.innerHTML += `
-          <li class="login-message">
-            <span style="color: blue; text-decoration: underline;">${email}</span> でログイン中
-          </li>
-          <li id="logoutButton">ログアウト</li>
-        `;
-      } else {
-        console.error('Email is undefined');
-      }
-    }
-  }
-
-  // Function to render the hamburger menu for logged in users
-  function renderHamburgerMenu() {
-    const hamburgerRegisterLink = document.getElementById('hamburgerRegisterLink');
-    const hamburgerLoginLink = document.getElementById('hamburgerLoginLink');
-    const menu = document.querySelector('.hamburger-menu ul');
-
-    if (isLoggedIn()) {
-      const email = getUserEmail();
-      console.log('Email:', email); // Debugging log
-      if (email) {
-        hamburgerRegisterLink.style.display = 'none';
-        hamburgerLoginLink.style.display = 'none';
-        menu.innerHTML += `
-          <li><a href="/favorite-recipes">お気に入りのレシピ</a></li>
-          <li><a href="/manage-my-substitutes">my代用品を管理</a></li>
-          <hr>
-          <li class="login-message" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
-            <span style="color: blue; text-decoration: underline;">${email}</span> <br> でログイン中
-          </li>
-          <li><a href="#" id="logoutLink">ログアウト</a></li>
-        `;
-      } else {
-        console.error('Email is undefined');
-      }
-    }
-  }
-
-  // Function to validate email
-  function validateEmail(email, emailErrorElement) {
-    if (!email) {
-      emailErrorElement.textContent = 'メールアドレスを入力してください';
-      emailErrorElement.style.display = 'block';
-      return false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      emailErrorElement.textContent = 'メールアドレス形式が誤っています';
-      emailErrorElement.style.display = 'block';
-      return false;
-    } else {
-      emailErrorElement.style.display = 'none';
-      return true;
-    }
-  }
-
-  // Function to validate password
-  function validatePassword(password, passwordErrorElement) {
-    if (!password) {
-      passwordErrorElement.textContent = 'パスワードを入力してください';
-      passwordErrorElement.style.display = 'block';
-      return false;
-    } else if (password.length < 8) {
-      passwordErrorElement.textContent = '8文字以上で入力してください';
-      passwordErrorElement.style.display = 'block';
-      return false;
-    } else if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
-      passwordErrorElement.textContent = '大文字、小文字、数字を含めて入力してください';
-      passwordErrorElement.style.display = 'block';
-      return false;
-    } else {
-      passwordErrorElement.style.display = 'none';
-      return true;
-    }
-  }
-
-  // Function to open the modal to select a substitute when multiple substitutes are found
-  function openSubstituteModal(substitutes, substituteContainer, cleanedIngredient) {
-    const modal = document.getElementById('substituteModal');
-    const substituteList = document.getElementById('substituteList');
-    const closeModal = document.getElementsByClassName('close')[0];
-
-    // Clear previous substitutes
-    substituteList.innerHTML = '';
-
-    // Add substitutes to the list as radio buttons
-    substitutes.forEach((substitute, index) => {
-      const listItem = document.createElement('li');
-      const radioInput = document.createElement('input');
-      radioInput.type = 'radio';
-      radioInput.name = 'substitute';
-      radioInput.value = substitute.substituteName;
-      radioInput.id = `substitute-${index}`;
-      const label = document.createElement('label');
-      label.htmlFor = `substitute-${index}`;
-      const ingredientNameStyled = `<span class="ingredient-name-styled">${cleanedIngredient}</span>`;
-      label.innerHTML = `${ingredientNameStyled} の分量 <span class="portion">${substitute.originalPortion}</span> に対して <span class="substitute-name">${substitute.substituteName}</span> の分量 <span class="portion">${substitute.substitutePortion}</span>`;
-      if (substitute.vegetarian) {
-        const vegBox = document.createElement('span');
-        vegBox.textContent = 'べジ';
-        vegBox.classList.add('veg-box');
-        label.appendChild(vegBox);
-      }
-      listItem.appendChild(radioInput);
-      listItem.appendChild(label);
-      substituteList.appendChild(listItem);
-    });
-
-    modal.style.display = 'block';
-
-    closeModal.onclick = () => {
-      modal.style.display = 'none';
-    };
-
-    window.onclick = (event) => {
-      if (event.target == modal) {
-        modal.style.display = 'none';
-      }
-    };
-
-    document.getElementById('selectSubstitute').onclick = () => {
-      const selectedSubstitute = document.querySelector('input[name="substitute"]:checked');
-      if (selectedSubstitute) {
-        const selectedLabel = selectedSubstitute.nextElementSibling;
-        substituteContainer.innerHTML = `${selectedLabel.innerHTML}`;
-        substituteContainer.classList.add('substitute-container'); // Apply the class for styling
-        modal.style.display = 'none';
-      } else {
-        alert('代用品を選択してください。');
-      }
-    };
-  }
-
-  // Function to display a message when no substitutes are found or when multiple substitutes are found
-  function displaySubstitutes(substitutes, ingredientElement, vegetarianMode, cleanedIngredient) {
-    // Remove any existing substitution containers
-    const existingContainers = ingredientElement.parentElement.querySelectorAll('.substitute-container, .no-substitutes-message, .clickable-text');
-    existingContainers.forEach(container => container.remove());
-
-    const substituteContainer = document.createElement('div');
-    substituteContainer.classList.add('substitute-container');
-
-    const filteredSubstitutes = vegetarianMode
-      ? substitutes.filter(substitute => substitute.vegetarian)
-      : substitutes;
-
-    if (!filteredSubstitutes || filteredSubstitutes.length === 0) {
-      const noSubstitutesMessage = document.createElement('div');
-      noSubstitutesMessage.textContent = '代用品が見つかりませんでした。';
-      noSubstitutesMessage.classList.add('no-substitutes-message');
-      if (ingredientElement) {
-        ingredientElement.parentElement.appendChild(noSubstitutesMessage); // Append message after ingredient-container
-      }
-    } else if (filteredSubstitutes.length === 1) {
-      const originalPortion = document.createElement('span');
-      originalPortion.classList.add('portion');
-      originalPortion.textContent = filteredSubstitutes[0].originalPortion;
-    
-      const substitutePortion = document.createElement('span');
-      substitutePortion.classList.add('portion');
-      substitutePortion.textContent = filteredSubstitutes[0].substitutePortion;
-    
-      const substituteName = document.createElement('span');
-      substituteName.classList.add('substitute-name');
-      substituteName.textContent = filteredSubstitutes[0].substituteName || 'No Info';
-    
-      const ingredientNameStyled = `<span class="ingredient-name-styled">${cleanedIngredient}</span>`;
-      substituteContainer.innerHTML = `${ingredientNameStyled} の分量 ${originalPortion.outerHTML} あたり ${substituteName.outerHTML} の分量 ${substitutePortion.outerHTML}`;
-    
-      if (filteredSubstitutes[0].vegetarian) {
-        const vegBox = document.createElement('span');
-        vegBox.textContent = 'べジ';
-        vegBox.classList.add('veg-box');
-        substituteContainer.appendChild(vegBox);
-      }
-      ingredientElement.parentElement.appendChild(substituteContainer); // Append container after ingredient-container    
-    } else {
-      const multipleSubstitutesText = document.createElement('span');
-      multipleSubstitutesText.textContent = '複数の代用品が見つかりました';
-      multipleSubstitutesText.classList.add('clickable-text');
-      multipleSubstitutesText.addEventListener('click', () => {
-        openSubstituteModal(filteredSubstitutes, substituteContainer, cleanedIngredient);
-      });
-      substituteContainer.appendChild(multipleSubstitutesText);
-      ingredientElement.parentElement.appendChild(substituteContainer); // Append container after ingredient-container
-    }
-  }
-
-  // Function to apply styles based on screen width
-  function applyStyles() {
-    const stepList = document.getElementById('stepList');
-    const steps = stepList.querySelectorAll('.step-item');
-
-    steps.forEach(step => {
-      const imageContainer = step.querySelector('.image-container');
-      const images = imageContainer.querySelectorAll('img');
-
-      if (window.innerWidth >= 769) {
-        // Apply styles for wide screens
-        let currentIndex = 0;
-        const showImage = (index) => {
-          images.forEach((img, i) => {
-            img.style.display = i === index ? 'block' : 'none';
-          });
-        };
-        showImage(currentIndex);
-
-        imageContainer.addEventListener('click', () => {
-          currentIndex = (currentIndex + 1) % images.length;
-          showImage(currentIndex);
-        });
-      } else {
-        // Apply styles for narrow screens
-        images.forEach(img => {
-          img.style.display = 'block';
-        });
-      }
-    });
-  }
-
-  // Call the functions to render the menus
-  renderWideScreenMenu();
-  renderHamburgerMenu();
-
-  // Add event listener for the hamburger button and menu for base or logout status
+export function setupHamburgerMenu() {
   const hamburgerButton = document.getElementById('hamburgerButton');
   const closeMenuButton = document.getElementById('closeMenuButton');
   const hamburgerMenu = document.getElementById('hamburgerMenu');
@@ -289,9 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
       hamburgerMenu.classList.remove('open');
     }
   });
+}
 
-  // Add event listeners for the registration, login and logout modals for base status
-  // Get the modal elements
+export function setupModals() {
   const registerModal = document.getElementById('registerModal');
   const loginModal = document.getElementById('loginModal');
   const logoutModal = document.getElementById('logoutModal');
@@ -301,10 +49,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const confirmLogoutButton = document.getElementById('confirmLogoutButton');
   const cancelLogoutButton = document.getElementById('cancelLogoutButton');
 
+  console.log('Setting up modals'); // Debugging log
+
+  // Check if elements are found
+  console.log('registerModal:', registerModal);
+  console.log('loginModal:', loginModal);
+  console.log('logoutModal:', logoutModal);
+  console.log('closeRegisterModal:', closeRegisterModal);
+  console.log('closeLoginModal:', closeLoginModal);
+  console.log('closeLogoutModal:', closeLogoutModal);
+  console.log('confirmLogoutButton:', confirmLogoutButton);
+  console.log('cancelLogoutButton:', cancelLogoutButton);
+
+
   // Open registration modal
   const hamburgerRegisterLink = document.getElementById('hamburgerRegisterLink');
   const registerButton = document.getElementById('registerButton');
   if (hamburgerRegisterLink) {
+    console.log('Attaching event listener to hamburgerRegisterLink'); // Debugging log
     hamburgerRegisterLink.addEventListener('click', (event) => {
       event.preventDefault();
       registerModal.style.display = 'block';
@@ -312,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (registerButton) {
+    console.log('Attaching event listener to registerButton'); // Debugging log
     registerButton.addEventListener('click', (event) => {
       event.preventDefault();
       registerModal.style.display = 'block';
@@ -322,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const hamburgerLoginLink = document.getElementById('hamburgerLoginLink');
   const loginButton = document.getElementById('loginButton');
   if (hamburgerLoginLink) {
+    console.log('Attaching event listener to hamburgerLoginLink'); // Debugging log
     hamburgerLoginLink.addEventListener('click', (event) => {
       event.preventDefault();
       loginModal.style.display = 'block';
@@ -329,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (loginButton) {
+    console.log('Attaching event listener to loginButton'); // Debugging log
     loginButton.addEventListener('click', (event) => {
       event.preventDefault();
       loginModal.style.display = 'block';
@@ -336,14 +101,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Redirect to register modal
+  const redirectToRegister = document.getElementById('redirectToRegister');
   if (redirectToRegister) {
+    console.log('Attaching event listener to redirectToRegister'); // Debugging log
     redirectToRegister.addEventListener('click', (event) => {
       event.preventDefault();
       loginModal.style.display = 'none';
       registerModal.style.display = 'block';
       document.getElementById('loginForm').reset(); // Clear input fields
-      emailError.style.display = 'none'; // Hide email error
-      passwordError.style.display = 'none'; // Hide password error
+      document.getElementById('loginEmailError').style.display = 'none'; // Hide email error
+      document.getElementById('loginPasswordError').style.display = 'none'; // Hide password error
     });
   }
 
@@ -368,32 +135,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Open logout modal
-  const logoutButton = document.getElementById('logoutButton');
-  const logoutLink = document.getElementById('logoutLink');
-
-  if (logoutButton) {
-    logoutButton.addEventListener('click', (event) => {
+  const logoutLink = document.getElementById('hamburgerLogoutLink');
+  if (logoutLink) {
+    console.log('Attaching event listener to logoutLink'); // Debugging log
+    logoutLink.addEventListener('click', (event) => {
       event.preventDefault();
+      console.log('Logout link clicked'); // Debugging log
       logoutModal.style.display = 'block';
     });
   }
 
-  if (logoutLink) {
-    logoutLink.addEventListener('click', (event) => {
+  const logoutButton = document.getElementById('logoutButton');
+  if (logoutButton) {
+    console.log('Attaching event listener to logoutButton'); // Debugging log
+    logoutButton.addEventListener('click', (event) => {
       event.preventDefault();
+      console.log('Logout button clicked'); // Debugging log
       logoutModal.style.display = 'block';
     });
   }
 
   // Close logout modal
   if (closeLogoutModal) {
+    console.log('Attaching event listener to closeLogoutModal'); // Debugging log
     closeLogoutModal.addEventListener('click', () => {
-      logoutModal.style.display = 'none';
-    });
-  }
-
-  if (cancelLogoutButton) {
-    cancelLogoutButton.addEventListener('click', () => {
       logoutModal.style.display = 'none';
     });
   }
@@ -407,11 +172,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Confirm logout
   if (confirmLogoutButton) {
+    console.log('Attaching event listener to confirmLogoutButton'); // Debugging log
     confirmLogoutButton.addEventListener('click', () => {
       handleLogout();
     });
   }
 
+  // Cancel logout
+  if (cancelLogoutButton) {
+    console.log('Attaching event listener to cancelLogoutButton'); // Debugging log
+    cancelLogoutButton.addEventListener('click', () => {
+      logoutModal.style.display = 'none';
+    });
+  }
+}
+
+export function setupFormSubmissions() {
   // Define email input elements
   const loginEmailInput = document.getElementById('loginEmail');
   const registerEmailInput = document.getElementById('registerEmail');
@@ -519,18 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+}
 
-  // Add event listener for Vegetarian Mode checkbox
-  document.getElementById('vegetarianMode').addEventListener('change', () => {
-    const vegetarianMode = document.getElementById('vegetarianMode').checked;
-    const description = document.getElementById('vegetarianDescription');
-    if (vegetarianMode) {
-      description.textContent = '肉、魚介類、卵、乳製品を含む代用品が提示されません';
-    } else {
-      description.textContent = '肉、魚介類等も含めた全ての代用品が提示されます';
-    }
-  });
-
+export function setupFetchRecipe() {
   // Function to fetch recipe
   async function fetchRecipe(url) {
     try {
@@ -691,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Apply styles based on screen width
-        applyStyles();
+        applyStylesToStepImg();
       }
 
       // Display advice
@@ -709,6 +476,19 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(error)  {
       console.error('There was a problem with the fetch operation:', error);
       alert('レシピの取得に失敗しました。URLを確認してください。');
+    }
+  });
+}
+
+export function setupSearchSubstitutes() {
+  // Add event listener for Vegetarian Mode checkbox
+  document.getElementById('vegetarianMode').addEventListener('change', () => {
+    const vegetarianMode = document.getElementById('vegetarianMode').checked;
+    const description = document.getElementById('vegetarianDescription');
+    if (vegetarianMode) {
+      description.textContent = '肉、魚介類、卵、乳製品を含む代用品が提示されません';
+    } else {
+      description.textContent = '肉、魚介類等も含めた全ての代用品が提示されます';
     }
   });
 
@@ -774,99 +554,23 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+}
 
-  // Apply styles based on screen width
-  function applyStyles() {
-    const stepList = document.getElementById('stepList');
-    const steps = stepList.querySelectorAll('.step-item');
+export function setupImageModals() {
+  // Add event listener to close button
+  const closeExpandedImageBtn = document.getElementById('closeExpandedImage');
+  closeExpandedImageBtn.addEventListener('click', closeExpandedImage);
 
-    steps.forEach(step => {
-      const imageContainer = step.querySelector('.image-container');
-      const images = imageContainer.querySelectorAll('img');
+  // Close the modal when clicking anywhere on the modal
+  const modal = document.getElementById('expandedImageModal');
+  modal.addEventListener('click', closeExpandedImage);
 
-      // Clear existing arrows and indicators
-      const leftArrow = imageContainer.querySelector('.left-arrow');
-      const rightArrow = imageContainer.querySelector('.right-arrow');
-      const indicators = imageContainer.querySelector('.image-indicators');
-      if (leftArrow) leftArrow.remove();
-      if (rightArrow) rightArrow.remove();
-      if (indicators) indicators.remove();
+  // Prevent closing the modal when clicking on the image itself
+  const modalImg = document.getElementById('expandedImage');
+  modalImg.addEventListener('click', (event) => {
+    event.stopPropagation();
+  });
 
-      if (images.length > 1) {
-        imageContainer.classList.add('multiple-images');
-
-        if (window.innerWidth >= 769) {
-          // Apply styles for wide screens
-          let currentIndex = 0;
-
-          // Add left and right arrow elements
-          const leftArrow = document.createElement('div');
-          leftArrow.classList.add('left-arrow');
-          leftArrow.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-circle" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-4.5-.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z"/></svg>';
-          imageContainer.appendChild(leftArrow);
-
-          const rightArrow = document.createElement('div');
-          rightArrow.classList.add('right-arrow');
-          rightArrow.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-circle" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z"/></svg>';
-          imageContainer.appendChild(rightArrow);
-
-          const indicators = document.createElement('div');
-          indicators.classList.add('image-indicators');
-          images.forEach((_, index) => {
-            const indicator = document.createElement('div');
-            indicator.classList.add('image-indicator');
-            if (index === currentIndex) {
-              indicator.classList.add('active');
-            }
-            indicators.appendChild(indicator);
-          });
-          imageContainer.appendChild(indicators);
-
-          const showImage = (index) => {
-            images.forEach((img, i) => {
-              img.style.display = i === index ? 'block' : 'none';
-            });
-            imageContainer.classList.toggle('has-prev', index > 0);
-            imageContainer.classList.toggle('has-next', index < images.length - 1);
-            indicators.querySelectorAll('.image-indicator').forEach((indicator, i) => {
-              indicator.classList.toggle('active', i === index);
-            });
-          };
-          showImage(currentIndex);
-
-          leftArrow.addEventListener('click', () => {
-            currentIndex = (currentIndex - 1 + images.length) % images.length;
-            showImage(currentIndex);
-          });
-
-          rightArrow.addEventListener('click', () => {
-            currentIndex = (currentIndex + 1) % images.length;
-            showImage(currentIndex);
-          });
-        } else {
-          // Remove arrows and indicators for narrow screens
-          const leftArrow = imageContainer.querySelector('.left-arrow');
-          const rightArrow = imageContainer.querySelector('.right-arrow');
-          const indicators = imageContainer.querySelector('.image-indicators');
-          if (leftArrow) leftArrow.remove();
-          if (rightArrow) rightArrow.remove();
-          if (indicators) indicators.remove();
-
-          // Apply styles for narrow screens
-          images.forEach(img => {
-            img.style.display = 'block';
-          });
-        }
-      } else {
-        // Apply styles for narrow screens
-        images.forEach(img => {
-          img.style.display = 'block';
-        });
-      }
-    });
-  }
-
-  // Apply styles on initial load
-  applyStyles();
-});
-
+  // Add event listener for window resize
+  window.addEventListener('resize', applyStylesToStepImg);
+}
