@@ -226,13 +226,25 @@ header {
   margin: 15% auto; /* 15% from the top and centered */
   padding: 20px;
   border: 1px solid #888;
-  width: 80%;
+  width: 90%;
   max-width: 620px;
   border-radius: 8px;
 }
 
 .modal-content p {
   margin: 10px 0;
+}
+
+#imageModal {
+  display: none; /* Use Flexbox */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+}
+
+#imageModal img {
+  max-width: min(450px, 100%); /* Set max width to 450px or 100%, whichever is smaller */
+  vertical-align: middle;
+  max-height: 80vh; /* Ensure the image fits within the viewport height */
 }
 
 .close {

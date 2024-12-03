@@ -1,7 +1,7 @@
 import { applyStylesToStepImg } from './applyStylesToStepImg.js';
-import { addImageEventListeners, observeNewImages } from './eventListeners.js';
 import { renderWideScreenMenu, renderHamburgerMenu } from './applyLoggedInStyles.js';
-import { setupHamburgerMenu, setupModals, setupFormSubmissions, setupFetchRecipe, setupSearchSubstitutes, setupImageModals } from './setup.js';
+import { setupHamburgerMenu, setupModals, setupFormSubmissions, setupFetchRecipe, setupSearchSubstitutes } from './setup.js';
+import { addImageEventListeners } from './imageExpansion.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM fully loaded and parsed'); // Debugging log
@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupFormSubmissions();
   setupFetchRecipe();
   setupSearchSubstitutes();
-  setupImageModals();
 
   // Apply styles on initial load
   applyStylesToStepImg();
@@ -23,6 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Add event listeners to all existing images
   addImageEventListeners();
 
-  // Use MutationObserver to watch for new images
-  observeNewImages();
+  // Reapply styles on window resize
+  window.addEventListener('resize', applyStylesToStepImg);
 });

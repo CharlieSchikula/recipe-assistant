@@ -7,7 +7,6 @@ export function renderWideScreenMenu() {
 
   if (isLoggedIn()) {
     const email = getUserEmail();
-    console.log('Email:', email); // Debugging log
     if (email) {
       registerButton.style.display = 'none';
       loginButton.style.display = 'none';
@@ -41,7 +40,7 @@ export function renderHamburgerMenu() {
 
   if (isLoggedIn()) {
     const email = getUserEmail();
-    console.log('Email:', email); // Debugging log
+    console.log('Email:', email);
     if (email) {
       hamburgerRegisterLink.style.display = 'none';
       hamburgerLoginLink.style.display = 'none';

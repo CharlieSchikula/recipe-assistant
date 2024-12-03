@@ -79,4 +79,5 @@ export function applyStylesToStepImg() {
       });
     }
   });
+  
 }

@@ -91,9 +91,8 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Modals -->
+    <!-- Modals -->
     <!-- Registration Form -->
     <div id="registerModal" class="modal">
       <div class="modal-content">
@@ -142,34 +141,33 @@
       </div>
     </div>
     
-  <!-- Logout Modal -->
-  <div id="logoutModal" class="modal">
-    <div class="modal-content" id="logoutModalContent">
-      <span class="close" id="closeLogoutModal">&times;</span>
-      <p>ログアウトしますか？</p>
-      <button id="confirmLogoutButton">ログアウト</button>
-      <button id="cancelLogoutButton">キャンセル</button>
+    <!-- Logout Modal -->
+    <div id="logoutModal" class="modal">
+      <div class="modal-content" id="logoutModalContent">
+        <span class="close" id="closeLogoutModal">&times;</span>
+        <p>ログアウトしますか？</p>
+        <button id="confirmLogoutButton">ログアウト</button>
+        <button id="cancelLogoutButton">キャンセル</button>
+      </div>
+    </div>
+
+    <!-- Modal for selecting a substitute -->
+    <div id="substituteModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>代用品を選択してください</h2>
+        <form id="substituteForm">
+          <ul id="substituteList"></ul>
+          <button type="button" id="selectSubstitute">決定</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+      <img class="modal-content" id="expandedImage">
     </div>
   </div>
-
-  <!-- Modal for selecting a substitute -->
-  <div id="substituteModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>代用品を選択してください</h2>
-      <form id="substituteForm">
-        <ul id="substituteList"></ul>
-        <button type="button" id="selectSubstitute">決定</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Expanded Image Modal -->
-  <div id="expandedImageModal" class="expanded-image-modal">
-    <span id="closeExpandedImage" class="expanded-image-close">&times;</span>
-    <img class="expanded-image-modal-content" id="expandedImage">
-  </div>
-
   <script src="scripts/main.js" type="module"></script>
 </body>
 </html>

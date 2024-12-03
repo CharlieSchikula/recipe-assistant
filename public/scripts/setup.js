@@ -1,4 +1,4 @@
-import { closeExpandedImage } from './imageExpansion.js';
+import { addImageEventListeners } from './imageExpansion.js';
 import { handleLogout } from './applyLoggedInStyles.js';
 import { displaySubstitutes } from './substitutes.js';
 import { validateEmail, validatePassword } from './validateEmailAndPassword.js';
@@ -49,24 +49,10 @@ export function setupModals() {
   const confirmLogoutButton = document.getElementById('confirmLogoutButton');
   const cancelLogoutButton = document.getElementById('cancelLogoutButton');
 
-  console.log('Setting up modals'); // Debugging log
-
-  // Check if elements are found
-  console.log('registerModal:', registerModal);
-  console.log('loginModal:', loginModal);
-  console.log('logoutModal:', logoutModal);
-  console.log('closeRegisterModal:', closeRegisterModal);
-  console.log('closeLoginModal:', closeLoginModal);
-  console.log('closeLogoutModal:', closeLogoutModal);
-  console.log('confirmLogoutButton:', confirmLogoutButton);
-  console.log('cancelLogoutButton:', cancelLogoutButton);
-
-
   // Open registration modal
   const hamburgerRegisterLink = document.getElementById('hamburgerRegisterLink');
   const registerButton = document.getElementById('registerButton');
   if (hamburgerRegisterLink) {
-    console.log('Attaching event listener to hamburgerRegisterLink'); // Debugging log
     hamburgerRegisterLink.addEventListener('click', (event) => {
       event.preventDefault();
       registerModal.style.display = 'block';
@@ -74,7 +60,6 @@ export function setupModals() {
   }
 
   if (registerButton) {
-    console.log('Attaching event listener to registerButton'); // Debugging log
     registerButton.addEventListener('click', (event) => {
       event.preventDefault();
       registerModal.style.display = 'block';
@@ -85,7 +70,6 @@ export function setupModals() {
   const hamburgerLoginLink = document.getElementById('hamburgerLoginLink');
   const loginButton = document.getElementById('loginButton');
   if (hamburgerLoginLink) {
-    console.log('Attaching event listener to hamburgerLoginLink'); // Debugging log
     hamburgerLoginLink.addEventListener('click', (event) => {
       event.preventDefault();
       loginModal.style.display = 'block';
@@ -93,7 +77,6 @@ export function setupModals() {
   }
 
   if (loginButton) {
-    console.log('Attaching event listener to loginButton'); // Debugging log
     loginButton.addEventListener('click', (event) => {
       event.preventDefault();
       loginModal.style.display = 'block';
@@ -103,7 +86,6 @@ export function setupModals() {
   // Redirect to register modal
   const redirectToRegister = document.getElementById('redirectToRegister');
   if (redirectToRegister) {
-    console.log('Attaching event listener to redirectToRegister'); // Debugging log
     redirectToRegister.addEventListener('click', (event) => {
       event.preventDefault();
       loginModal.style.display = 'none';
@@ -137,27 +119,22 @@ export function setupModals() {
   // Open logout modal
   const logoutLink = document.getElementById('hamburgerLogoutLink');
   if (logoutLink) {
-    console.log('Attaching event listener to logoutLink'); // Debugging log
     logoutLink.addEventListener('click', (event) => {
       event.preventDefault();
-      console.log('Logout link clicked'); // Debugging log
       logoutModal.style.display = 'block';
     });
   }
 
   const logoutButton = document.getElementById('logoutButton');
   if (logoutButton) {
-    console.log('Attaching event listener to logoutButton'); // Debugging log
     logoutButton.addEventListener('click', (event) => {
       event.preventDefault();
-      console.log('Logout button clicked'); // Debugging log
       logoutModal.style.display = 'block';
     });
   }
 
   // Close logout modal
   if (closeLogoutModal) {
-    console.log('Attaching event listener to closeLogoutModal'); // Debugging log
     closeLogoutModal.addEventListener('click', () => {
       logoutModal.style.display = 'none';
     });
@@ -172,7 +149,6 @@ export function setupModals() {
 
   // Confirm logout
   if (confirmLogoutButton) {
-    console.log('Attaching event listener to confirmLogoutButton'); // Debugging log
     confirmLogoutButton.addEventListener('click', () => {
       handleLogout();
     });
@@ -180,7 +156,6 @@ export function setupModals() {
 
   // Cancel logout
   if (cancelLogoutButton) {
-    console.log('Attaching event listener to cancelLogoutButton'); // Debugging log
     cancelLogoutButton.addEventListener('click', () => {
       logoutModal.style.display = 'none';
     });
@@ -473,6 +448,9 @@ export function setupFetchRecipe() {
 
       // Turn off the Check All button
       document.getElementById('checkAll').checked = false;
+
+      // Add event listeners to new images
+      addImageEventListeners();
     } catch(error)  {
       console.error('There was a problem with the fetch operation:', error);
       alert('レシピの取得に失敗しました。URLを確認してください。');
@@ -554,23 +532,4 @@ export function setupSearchSubstitutes() {
       }
     });
   });
-}
-
-export function setupImageModals() {
-  // Add event listener to close button
-  const closeExpandedImageBtn = document.getElementById('closeExpandedImage');
-  closeExpandedImageBtn.addEventListener('click', closeExpandedImage);
-
-  // Close the modal when clicking anywhere on the modal
-  const modal = document.getElementById('expandedImageModal');
-  modal.addEventListener('click', closeExpandedImage);
-
-  // Prevent closing the modal when clicking on the image itself
-  const modalImg = document.getElementById('expandedImage');
-  modalImg.addEventListener('click', (event) => {
-    event.stopPropagation();
-  });
-
-  // Add event listener for window resize
-  window.addEventListener('resize', applyStylesToStepImg);
 }
