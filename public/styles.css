@@ -630,7 +630,7 @@ input:checked + .slider:before {
   margin-top: 5px;
 }
 
-.clickable-text {
+.multiple-substitutes-list {
   cursor: pointer;
   color: blue;
   text-decoration: underline;

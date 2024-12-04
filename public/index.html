@@ -6,6 +6,7 @@
   <title>Recipe Assistant for Cookpad</title>
   <link rel="stylesheet" href="reset.css">
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon"> <!-- Link to favicon -->
 </head>
 <body>
   <header>
@@ -129,10 +130,10 @@
         <p>アカウントをお持ちでない方は、<a href="#" id="redirectToRegister">こちらからご登録</a>いただけます。</p>
         <form id="loginForm">
           <label for="loginEmail">メールアドレス</label>
-          <input type="email" id="loginEmail" placeholder="mailaddress@recipe.com" required>
+          <input type="email" id="loginEmail" name="email" placeholder="mailaddress@recipe.com" required>
           <span class="error-message" id="emailError"></span>
           <label for="loginPassword">パスワード</label>
-          <input type="password" id="loginPassword" placeholder="************" required>
+          <input type="password" id="loginPassword" name="password" placeholder="************" required>
           <span class="error-message" id="passwordError"></span>
           <p>8文字以上で、大文字、小文字、数字を含めて入力してください</p>
           <p class="warning-text">試作サイトのため、パスワードのリセット機能は備えておりません。<br>パスワードを忘れた場合は、適当なメールアドレスでアカウントを作成し直してください。</p>

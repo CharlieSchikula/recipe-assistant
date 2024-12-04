@@ -288,6 +288,57 @@ export function setupFetchRecipe() {
     }
   }
 
+  // Function to check if a recipe is in the favorite list
+  async function checkIfFavorite(url) {
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Token from localStorage:', token); // Log the token from localStorage
+      const response = await fetch(`/api/favorites?url=${encodeURIComponent(url)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      return data.isFavorite;
+    } catch (error) {
+      console.error('Error checking if favorite:', error);
+      return false;
+    }
+  }
+
+  // Function to add a recipe to the favorite list
+  async function addToFavorites(url) {
+    const token = localStorage.getItem('token');
+    console.log('Token from localStorage:', token); // Log the token from localStorage
+    const response = await fetch('/api/favorites', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ url })
+    });
+    const data = await response.json();
+    return data;
+  }
+
+  // Function to remove a recipe from the favorite list
+  async function removeFromFavorites(url) {
+    const token = localStorage.getItem('token');
+    console.log('Token from localStorage:', token); // Log the token from localStorage
+    const response = await fetch(`/api/favorites?url=${encodeURIComponent(url)}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await response.json();
+    return data;
+  }
+  
   // Add event listener for Fetch Recipe button
   document.getElementById('fetchRecipe').addEventListener('click', async () => {
     const url = document.getElementById('urlInput').value.trim();
@@ -381,7 +432,7 @@ export function setupFetchRecipe() {
             checkbox.addEventListener('change', (event) => {
               console.log('Checkbox changed:', event.target.checked);
               const ingredientElement = event.target.closest('.ingredient-container').parentElement;
-              const containersToRemove = ingredientElement.querySelectorAll('.substitute-container, .no-substitutes-message, .clickable-text');
+              const containersToRemove = ingredientElement.querySelectorAll('.substitute-container, .no-substitutes-message, .multiple-substitutes-list');
               if (!event.target.checked) {
                 containersToRemove.forEach(container => container.remove());
                 console.log('Removed containers:', containersToRemove);
@@ -456,8 +507,14 @@ export function setupFetchRecipe() {
       alert('レシピの取得に失敗しました。URLを確認してください。');
     }
   });
-}
 
+  return {
+    fetchRecipe,
+    checkIfFavorite,
+    addToFavorites,
+    removeFromFavorites,
+  };
+}
 
 export function setupSearchSubstitutes() {
 // Add event listener for Vegetarian Mode checkbox
@@ -471,10 +528,17 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
   }
 });
 
+  // Function to extract and normalize ingredient names
+  function extractText(input) {
+    const pattern = /[★●]?([^\(\)（）]+)(?:\（.*?\）|\(.*?\))?/;
+    const match = input.match(pattern);
+    return match ? match[1].trim() : input;
+  }
+
   // Add event listener for search Substitutes button
   document.getElementById('searchSubstitutesButton').addEventListener('click', () => {
     const checkedIngredients = Array.from(document.querySelectorAll('.ingredient-checkbox:checked'))
-    .map(checkbox => checkbox.nextElementSibling.textContent.trim());
+      .map(checkbox => checkbox.nextElementSibling.textContent.trim());
 
     if (checkedIngredients.length === 0) {
       alert('１つ以上の材料を選択してください。');
@@ -484,7 +548,9 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
     const vegetarianMode = document.getElementById('vegetarianMode').checked;
 
     checkedIngredients.forEach(ingredient => {
-      const cleanedIngredient = ingredient.replace(/[^\p{L}\p{N}\p{Zs}]/gu, ''); // Remove non-word characters except Japanese characters
+      const cleanedIngredient = extractText(ingredient);
+      const ingredientElement = Array.from(document.querySelectorAll('.ingredient-name')).
+        find(el => el.textContent.trim() === ingredient);
       fetch(`/api/substitutes?ingredient=${encodeURIComponent(cleanedIngredient)}`)
         .then(response => {
           if (response.status === 404) {
@@ -496,22 +562,7 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
           return response.json();
         })
         .then(substitutes => {
-          const ingredientElement = Array.from(document.querySelectorAll('.ingredient-name'))
-            .find(el => el.textContent.replace(/[^\p{L}\p{N}\p{Zs}]/gu, '') === cleanedIngredient);
-        
-          if (!ingredientElement) {
-            console.error('Ingredient element not found for:', cleanedIngredient);
-            displaySubstitutes([], null, vegetarianMode); // Ensure message is displayed
-            return;
-          }
-        
-          if (!substitutes) {
-            console.error('No substitutes found for:', cleanedIngredient);
-            displaySubstitutes([], ingredientElement.parentElement, vegetarianMode); // Ensure message is displayed
-            return;
-          }
-        
-          displaySubstitutes(substitutes, ingredientElement.parentElement, vegetarianMode, cleanedIngredient);
+          displaySubstitutes(substitutes, ingredientElement, vegetarianMode, cleanedIngredient);
         })
         .catch(error => {
           console.error('Error fetching substitutes:', error);
@@ -526,7 +577,7 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
     checkboxes.forEach(checkbox => {
       checkbox.checked = event.target.checked;
       const ingredientElement = checkbox.closest('.ingredient-container').parentElement;
-      const containersToRemove = ingredientElement.querySelectorAll('.substitute-container, .no-substitutes-message, .clickable-text');
+      const containersToRemove = ingredientElement.querySelectorAll('.substitute-container, .no-substitutes-message, .multiple-substitutes-list');
       if (!event.target.checked) {
         containersToRemove.forEach(container => container.remove());
         console.log('Removed containers:', containersToRemove);

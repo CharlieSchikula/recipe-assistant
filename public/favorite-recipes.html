@@ -35,11 +35,44 @@
       </div>
     </div>
   </header>
-  <main>
+  <div class="container">
     <h1>お気に入りのレシピ</h1>
-    <p>ここにお気に入りのレシピのリストを表示します。</p>
-    <!-- Add your favorite recipes content here -->
-  </main>
+    <ul id="favoriteList"></ul>
+  </div>
+  <script type="module">
+    import { fetchRecipe } from './setup.js';
+
+    async function fetchFavoriteRecipes() {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/favorites//all', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const favorites = await response.json();
+      const favoriteList = document.getElementById('favoriteList');
+      favoriteList.innerHTML = '';
+
+      favorites.forEach(async (favorite) => {
+        const title = await fetchRecipeTitle(favorite.url);
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="${favorite.url}" target="_blank">${title}</a> <button onclick="removeFavorite('${favorite.url}')">削除</button>`;
+        favoriteList.appendChild(li);
+      });
+    }
+
+    async function fetchRecipeTitle(url) {
+      const data = await fetchRecipe(url);
+      return data.title;
+    }
+
+    async function removeFavorite(url) {
+      await removeFromFavorites(url);
+      fetchFavoriteRecipes();
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchFavoriteRecipes);
+  </script>
 
   <!-- Logout Modal -->
   <div id="logoutModal" class="modal">
@@ -52,6 +85,6 @@
     </div>
   </div>
 
-  <script src="scripts.js"></script>
+  <script src="scripts/main.js" type="module"></script>
 </body>
 </html>

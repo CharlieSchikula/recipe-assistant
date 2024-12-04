@@ -110,9 +110,8 @@ export function closeExpandedImage(event) {
 // Function to add event listeners to images
 export function addImageEventListeners() {
   const images = document.querySelectorAll('img');
-  console.log('Total images found:', images.length); // Debugging log
+  // console.log('Total images found:', images.length); // Debugging log
   images.forEach(image => {
-    console.log('Adding click event listener to image:', image.src); // Debugging log
     image.addEventListener('click', expandImage);
   });
 }

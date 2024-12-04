@@ -17,17 +17,18 @@ router.post('/register', [
     .matches(/[a-z]/).withMessage('Password must contain a lowercase letter')
     .matches(/[0-9]/).withMessage('Password must contain a number')
 ], async (req, res) => {
+  console.log('Register request received'); // Log the request
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('Validation errors:', errors.array()); // Log validation errors
     return res.status(400).json({ errors: errors.array() });
   }
 
   const { email, password } = req.body;
-
-  console.log(`Received password for ${email}: ${password}`); // Log the hashed password
+  const user = new User({ email, password });
 
   try {
-    const user = new User({ email, password });
     await user.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
@@ -45,7 +46,6 @@ router.post('/login', [
   check('password').exists().withMessage('Password is required')
 ], async (req, res) => {
   console.log('Login request received'); // Log the request
-  console.log('Request body:', req.body); // Log the request body
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -62,7 +62,6 @@ router.post('/login', [
   }
 
   console.log(`User found: ${JSON.stringify(user)}`); // Log the user object
-  console.log(`Entered password: ${password}`); // Log the entered password
   console.log(`Hashed password from DB: ${user.password}`); // Log the hashed password from the database
 
   const isMatch = await user.matchPassword(password); // Use the matchPassword method
@@ -76,16 +75,25 @@ router.post('/login', [
   res.send({ token });
 });
 
+// Verify token middleware
 export const verifyToken = (req, res, next) => {
-  const token = req.headers['authorization'];
+  const authHeader = req.headers.authorization;
+  console.log('Authorization header:', authHeader); // Log the Authorization header
+
+  const token = authHeader && authHeader.split(' ')[1];
+  console.log('Extracted token:', token); // Log the extracted token
+
   if (!token) {
-    return res.status(401).send({ message: 'トークンが必要です。' });
+    console.log('Token is missing'); // Log missing token
+    return res.status(401).send({ message: 'Token is required.' });
   }
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
+      console.log('Token verification failed:', err); // Log token verification error
       return res.status(401).send({ message: '無効なトークンです。' });
     }
+    console.log('Decoded token:', decoded); // Log the decoded token
     req.userId = decoded.userId;
     next();
   });

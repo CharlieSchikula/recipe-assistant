@@ -1,8 +1,10 @@
 // Function to display a message when no substitutes are found or when multiple substitutes are found
 export function displaySubstitutes(substitutes, ingredientElement, vegetarianMode, cleanedIngredient) {
   // Remove any existing substitution containers
-  const existingContainers = ingredientElement.parentElement.querySelectorAll('.substitute-container, .no-substitutes-message, .clickable-text');
-  existingContainers.forEach(container => container.remove());
+  const liElement = ingredientElement.closest('li'); // Find the closest li element
+  if (liElement) {
+    liElement.querySelectorAll('.substitute-container, .no-substitutes-message').forEach(el => el.remove());
+  }
 
   const substituteContainer = document.createElement('div');
   substituteContainer.classList.add('substitute-container');
@@ -15,9 +17,7 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
     const noSubstitutesMessage = document.createElement('div');
     noSubstitutesMessage.textContent = '代用品が見つかりませんでした。';
     noSubstitutesMessage.classList.add('no-substitutes-message');
-    if (ingredientElement) {
-      ingredientElement.parentElement.appendChild(noSubstitutesMessage); // Append message after ingredient-container
-    }
+    liElement.appendChild(noSubstitutesMessage); // Append message after ingredient-container
   } else if (filteredSubstitutes.length === 1) {
     const originalPortion = document.createElement('span');
     originalPortion.classList.add('portion');
@@ -40,16 +40,20 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
       vegBox.classList.add('veg-box');
       substituteContainer.appendChild(vegBox);
     }
-    ingredientElement.parentElement.appendChild(substituteContainer); // Append container after ingredient-container    
   } else {
     const multipleSubstitutesText = document.createElement('span');
     multipleSubstitutesText.textContent = '複数の代用品が見つかりました';
-    multipleSubstitutesText.classList.add('clickable-text');
+    multipleSubstitutesText.classList.add('multiple-substitutes-list');
     multipleSubstitutesText.addEventListener('click', () => {
       openSubstituteModal(filteredSubstitutes, substituteContainer, cleanedIngredient);
     });
     substituteContainer.appendChild(multipleSubstitutesText);
-    ingredientElement.parentElement.appendChild(substituteContainer); // Append container after ingredient-container
+  }
+
+  if (liElement) {
+    liElement.appendChild(substituteContainer); // Append substitute-container to the li element
+  } else {
+    ingredientElement.appendChild(substituteContainer); // Fallback in case liElement is not found
   }
 }
 

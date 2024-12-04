@@ -4,8 +4,10 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import authRoutes from '../middleware/auth.js';
 import Substitute from '../models/Substitute.js';
+import Favorite from '../models/Favorite.js';
 import { fileURLToPath } from 'url'; // Import fileURLToPath
 import { dirname } from 'path'; // Import dirname
+import { verifyToken } from '../middleware/auth.js';
 
 const __filename = fileURLToPath(import.meta.url); // Get the current file URL
 const __dirname = dirname(__filename); // Get the directory name
@@ -74,11 +76,12 @@ router.get('/api/recipe', async (req, res) => {
     });
     advice = advice.trim();
 
-    console.log('Title:', title);
-    console.log('Ingredients:', ingredients);
-    console.log('Steps:', steps);
-    console.log('Servings:', servings);
-    console.log('Advice:', advice);
+    // For debugging
+    // console.log('Title:', title);
+    // console.log('Ingredients:', ingredients);
+    // console.log('Steps:', steps);
+    // console.log('Servings:', servings);
+    // console.log('Advice:', advice);
 
     res.json({ title, ingredients, steps, servings, advice });
   } catch (error) {
@@ -106,15 +109,69 @@ router.get('/api/substitutes', async (req, res) => {
   }
 });
 
-// Define your routes and middleware
-router.get('/favorite-recipes', (req, res) => {
-  // Serve the favorite-recipes.html file
-  res.sendFile(path.join(__dirname, '../public', 'favorite-recipes.html')); // Adjust the path to the public directory
+// Add a recipe to the favorite list
+router.post('/api/favorites', verifyToken, async (req, res) => {
+  const { url } = req.body;
+  const email = req.user.email;
+
+  console.log('Query parameters:', req.query); // Log the query parameters
+  console.log('User email:', email); // Log the user email
+
+  try {
+    const favorite = new Favorite({ email, url });
+    await favorite.save();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
+// Remove a recipe from the favorite list
+router.delete('/api/favorites', verifyToken, async (req, res) => {
+  const { url } = req.query;
+  const email = req.user.email;
+
+  try {
+    await Favorite.findOneAndDelete({ email, url });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Check if a recipe is in the favorite list
+router.get('/api/favorites', verifyToken, async (req, res) => {
+  const { url } = req.query;
+  const email = req.user.email;
+
+  try {
+    const favorite = await Favorite.findOne({ email, url });
+    res.json({ isFavorite: !!favorite }); // Convert favorite to a boolean
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Fetch all favorite recipes for the authenticated user
+router.get('/api/favorites/all', verifyToken, async (req, res) => {
+  const email = req.user.email;
+
+  try {
+    const favorites = await Favorite.find({ email });
+    res.json(favorites);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Serve the favorite-recipes.html file
+router.get('/favorite-recipes', verifyToken, (req, res) => {
+  res.sendFile(path.join(__dirname, '../public', 'favorite-recipes.html'));
+});
+
+// Serve the manage-my-substitutes.html file
 router.post('/manage-my-substitutes', (req, res) => {
-  // Handle registering a substitute
-  res.sendFile(path.join(__dirname, '../public', 'manage-my-substitutes.html')); // Adjust the path to the public directory
+  res.sendFile(path.join(__dirname, '../public', 'manage-my-substitutes.html'));
 });
 
 // Use the router
