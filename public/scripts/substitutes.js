@@ -9,6 +9,9 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
   const substituteContainer = document.createElement('div');
   substituteContainer.classList.add('substitute-container');
 
+  // Ensure substitutes is always an array
+  substitutes = substitutes || [];
+
   const filteredSubstitutes = vegetarianMode
     ? substitutes.filter(substitute => substitute.vegetarian)
     : substitutes;
@@ -61,7 +64,7 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
 function openSubstituteModal(substitutes, substituteContainer, cleanedIngredient) {
   const modal = document.getElementById('substituteModal');
   const substituteList = document.getElementById('substituteList');
-  const closeModal = document.getElementsByClassName('close')[0];
+  const closeModal = document.getElementById('closeSubstituteModal');
 
   // Clear previous substitutes
   substituteList.innerHTML = '';
@@ -89,14 +92,17 @@ function openSubstituteModal(substitutes, substituteContainer, cleanedIngredient
     substituteList.appendChild(listItem);
   });
 
+  // Show the modal
   modal.style.display = 'block';
 
+  // Close the modal when the close button is clicked
   closeModal.onclick = () => {
     modal.style.display = 'none';
   };
 
+  // Close the modal when clicking outside of it
   window.onclick = (event) => {
-    if (event.target == modal) {
+    if (event.target === modal) {
       modal.style.display = 'none';
     }
   };
