@@ -39,11 +39,15 @@ router.get('/api/recipe', async (req, res) => {
     const { data } = await axios.get(url);
     const $ = cheerio.load(data);
 
+    let id = "";
     let title = '';
     const ingredients = [];
     const steps = [];
     let servings = '';
     let advice = '';
+
+    // Scrape recipe id
+    id = url.match(/\/recipes\/(\d+)-/)[1];
 
     // Scrape title
     title = $('h1').text().trim();
@@ -88,7 +92,7 @@ router.get('/api/recipe', async (req, res) => {
     // console.log('Servings:', servings);
     // console.log('Advice:', advice);
 
-    res.json({ title, ingredients, steps, servings, advice });
+    res.json({ id, title, ingredients, steps, servings, advice });
   } catch (error) {
     console.error('Error fetching recipe:', error);
     res.status(500).send('Error fetching recipe');
@@ -116,14 +120,14 @@ router.get('/api/substitutes', async (req, res) => {
 
 // Add a recipe to the favorite list
 router.post('/api/favorites', verifyToken, async (req, res) => {
-  const { url } = req.body;
+  const { recipeId } = req.body;
   const email = req.user.email;
 
   console.log('Query parameters:', req.query); // Log the query parameters
   console.log('User email:', email); // Log the user email
 
   try {
-    const favorite = new Favorite({ email, url });
+    const favorite = new Favorite({ email, recipeId, url: `https://cookpad.com/recipe/${recipeId}` });
     await favorite.save();
     res.json({ success: true });
   } catch (error) {
@@ -133,11 +137,11 @@ router.post('/api/favorites', verifyToken, async (req, res) => {
 
 // Remove a recipe from the favorite list
 router.delete('/api/favorites', verifyToken, async (req, res) => {
-  const { url } = req.query;
+  const { recipeId } = req.query;
   const email = req.user.email;
 
   try {
-    await Favorite.findOneAndDelete({ email, url });
+    await Favorite.findOneAndDelete({ email, recipeId });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -146,11 +150,11 @@ router.delete('/api/favorites', verifyToken, async (req, res) => {
 
 // Check if a recipe is in the favorite list
 router.get('/api/favorites', verifyToken, async (req, res) => {
-  const { url } = req.query;
+  const { recipeId } = req.query;
   const email = req.user.email;
 
   try {
-    const favorite = await Favorite.findOne({ email, url });
+    const favorite = await Favorite.findOne({ email, recipeId });
     res.json({ isFavorite: !!favorite }); // Convert favorite to a boolean
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

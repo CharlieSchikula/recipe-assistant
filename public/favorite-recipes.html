@@ -53,7 +53,7 @@
     function checkToken() {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('トークンの有効期限が切れています。ログインし直してください');
+        alert('トークンが存在しません。ログインし直してください');
         window.location.href = '/';
         return false;
       }
@@ -69,7 +69,7 @@
         }
       } catch (e) {
         console.error('Invalid token:', e);
-        alert('トークンの有効期限が切れています。ログインし直してください');
+        alert('トークンが無効です。ログインし直してください');
         localStorage.removeItem('token');
         window.location.href = '/';
         return false;
@@ -82,11 +82,11 @@
       setupHamburgerMenu();
       setupModals();
       renderWideScreenMenu();
-      renderHamburgerMenu();
+      renderHamburgerMenu('favorite-recipes');
 
       // Function to make an authenticated API call
       async function fetchWithAuth(url, options = {}) {
-        console.log('fetchWithAuth called'); // Log the function call
+        // console.log('fetchWithAuth called'); // Log the function call
 
         const token = localStorage.getItem('token');
         if (!token) {
@@ -94,21 +94,21 @@
           return;
         }
 
-        console.log('Token found:', token); // Log the token
+        // console.log('Token found:', token); // Log the token
 
         const headers = {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         };
 
-        console.log('Making fetch request to:', url); // Log the URL
+        // console.log('Making fetch request to:', url); // Log the URL
 
         const response = await fetch(url, {
           ...options,
           headers,
         });
 
-        console.log('Response status:', response.status); // Log the response status
+        // console.log('Response status:', response.status); // Log the response status
 
         if (!response.ok) {
           if (response.status === 401) {

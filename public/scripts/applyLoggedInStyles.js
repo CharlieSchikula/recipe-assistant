@@ -1,3 +1,22 @@
+// Function to check if the user is logged in
+function isLoggedIn() {
+  return !!localStorage.getItem('token');
+}
+
+// Function to get the user's email from the token
+function getUserEmail() {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.email;
+  } catch (e) {
+    console.error('Error parsing token:', e);
+    return null;
+  }
+}
+
 // Function to render the wide screen menu for logged in users
 export function renderWideScreenMenu() {
   const registerButton = document.getElementById('registerButton');
@@ -32,7 +51,7 @@ export function renderWideScreenMenu() {
 }
 
 // Function to render the hamburger menu for logged in users
-export function renderHamburgerMenu() {
+export function renderHamburgerMenu(currentPage) {
   const hamburgerRegisterLink = document.getElementById('hamburgerRegisterLink');
   const hamburgerLoginLink = document.getElementById('hamburgerLoginLink');
   const hamburgerLogoutLink = document.getElementById('hamburgerLogoutLink');
@@ -40,7 +59,7 @@ export function renderHamburgerMenu() {
 
   if (isLoggedIn()) {
     const email = getUserEmail();
-    console.log('Email:', email);
+    console.log('UserEmail:', email);
     if (email) {
       hamburgerRegisterLink.style.display = 'none';
       hamburgerLoginLink.style.display = 'none';
@@ -49,18 +68,43 @@ export function renderHamburgerMenu() {
       // Clear existing menu items except the logout link
       menu.innerHTML = '';
 
-      // Add menu items
-      menu.innerHTML += `
-        <li><a href="/favorite-recipes">お気に入りのレシピ</a></li>
-        <li><a href="/manage-my-substitutes">my代用品を管理</a></li>
-        <hr>
-        <li class="login-message" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
-          <span style="color: blue; text-decoration: underline;">${email}</span> <br> でログイン中
-        </li>
-      `;
+      // Update menu items based on the current page
+      if (currentPage === 'favorite-recipes') {
+        menu.innerHTML = `
+            <li><a href="/" style="font-weight: bold; color: darkcyan;">ホーム</a></li>
+            <li><a href="/manage-my-substitutes">my代用品を管理</a></li>
+            <hr>
+            <li class="login-message" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
+              <span style="color: blue; text-decoration: underline;">${email}</span> <br> でログイン中
+            </li>
+          `;
+        // Append the logout link as the last item
+        menu.appendChild(hamburgerLogoutLink);
+      } else if (currentPage === 'manage-my-substitutes') {
+        menu.innerHTML = `
+            <li><a href="/" style="font-weight: bold; color: darkcyan;">ホーム</a></li>
+            <li><a href="/favorite-recipes">お気に入りのレシピ</a></li>
+            <hr>
+            <li class="login-message" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
+              <span style="color: blue; text-decoration: underline;">${email}</span> <br> でログイン中
+            </li>
+          `;
+        // Append the logout link as the last item
+        menu.appendChild(hamburgerLogoutLink);
+      } else {
+        // Add menu items
+        menu.innerHTML += `
+          <li><a href="/favorite-recipes">お気に入りのレシピ</a></li>
+          <li><a href="/manage-my-substitutes">my代用品を管理</a></li>
+          <hr>
+          <li class="login-message" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
+            <span style="color: blue; text-decoration: underline;">${email}</span> <br> でログイン中
+          </li>
+        `;
 
-      // Append the logout link as the last item
-      menu.appendChild(hamburgerLogoutLink);
+        // Append the logout link as the last item
+        menu.appendChild(hamburgerLogoutLink);
+      } 
     } else {
       console.error('Email is undefined');
     }
@@ -71,24 +115,4 @@ export function renderHamburgerMenu() {
 export function handleLogout() {
   localStorage.removeItem('token');
   window.location.reload(); // Reload the page to update the menu
-}
-
-// Function to check if the user is logged in
-function isLoggedIn() {
-  const token = localStorage.getItem('token');
-  return token !== null;
-}
-
-// Function to get the user's email from the token
-function getUserEmail() {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
-
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.email;
-  } catch (e) {
-    console.error('Error parsing token:', e);
-    return null;
-  }
 }

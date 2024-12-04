@@ -18,7 +18,8 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
 
   if (!filteredSubstitutes || filteredSubstitutes.length === 0) {
     const noSubstitutesMessage = document.createElement('div');
-    noSubstitutesMessage.textContent = '代用品が見つかりませんでした。';
+    noSubstitutesMessage.textContent = `${cleanedIngredient}の代用品が見つかりませんでした。`;
+    console.log('No substitutes found for:', cleanedIngredient);
     noSubstitutesMessage.classList.add('no-substitutes-message');
     liElement.appendChild(noSubstitutesMessage); // Append message after ingredient-container
   } else if (filteredSubstitutes.length === 1) {

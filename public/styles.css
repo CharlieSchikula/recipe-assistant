@@ -510,21 +510,39 @@ input:checked + .slider:before {
 }
 
 
-/* Recipe Name */
+/* Recipe */
 #recipe {
   margin-top: 20px;
 }
 
+/* Recipe Name */
 .recipe-name-box {
-  margin-bottom: 20px;
-  margin-left: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the content horizontally */
+  margin: 20px auto; /* Center the box itself */
 }
 
-.recipe-name-box h1 {
+#recipeName {
   font-size: 2rem;
   color: darkslategray;
 } 
 
+.favorite-button {
+  background-color: white;
+  color: pink;
+  border: none;
+  cursor: pointer;
+  font-size: 1.75rem;
+  padding: 1rem 0 1rem 1rem;
+  border-radius: 50%;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.favorite-button.favorited {
+  background-color: white;
+  color: red;
+}
 
 /* layout for recipe contents */
 .ingredients, .steps, .advice {
