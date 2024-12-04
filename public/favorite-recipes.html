@@ -16,6 +16,9 @@
       <!-- Wide screen menu -->
       <nav class="wide-screen-menu">
         <ul class="header-buttons">
+          <li id="loginButton">ログイン</li>
+          <li id="registerButton">アカウントを作る</li>
+          <li id="logoutButton">ログアウト</li>
         </ul>
       </nav>
       <!-- Narrow screen menu -->
@@ -30,6 +33,9 @@
             <button id="closeMenuButton">×</button>
           </div>
           <ul>
+            <li id="hamburgerRegisterLink">アカウントを作る</li>
+            <li id="hamburgerLoginLink">ログイン</li>
+            <li id="hamburgerLogoutLink">ログアウト</li>
           </ul>
         </div>
       </div>
@@ -40,38 +46,105 @@
     <ul id="favoriteList"></ul>
   </div>
   <script type="module">
-    import { fetchRecipe } from './setup.js';
+    import { setupHamburgerMenu, setupModals } from './scripts/setup.js';
+    import { renderWideScreenMenu, renderHamburgerMenu } from './scripts/applyLoggedInStyles.js';
 
-    async function fetchFavoriteRecipes() {
+    // Function to check token validity
+    function checkToken() {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/favorites//all', {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      if (!token) {
+        alert('トークンの有効期限が切れています。ログインし直してください');
+        window.location.href = '/';
+        return false;
+      }
+
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const exp = payload.exp * 1000;
+        if (Date.now() >= exp) {
+          alert('トークンの有効期限が切れています。ログインし直してください');
+          localStorage.removeItem('token');
+          window.location.href = '/';
+          return false;
         }
-      });
-      const favorites = await response.json();
-      const favoriteList = document.getElementById('favoriteList');
-      favoriteList.innerHTML = '';
+      } catch (e) {
+        console.error('Invalid token:', e);
+        alert('トークンの有効期限が切れています。ログインし直してください');
+        localStorage.removeItem('token');
+        window.location.href = '/';
+        return false;
+      }
 
-      favorites.forEach(async (favorite) => {
-        const title = await fetchRecipeTitle(favorite.url);
-        const li = document.createElement('li');
-        li.innerHTML = `<a href="${favorite.url}" target="_blank">${title}</a> <button onclick="removeFavorite('${favorite.url}')">削除</button>`;
-        favoriteList.appendChild(li);
-      });
+      return true;
     }
 
-    async function fetchRecipeTitle(url) {
-      const data = await fetchRecipe(url);
-      return data.title;
-    }
+    if (checkToken()) {
+      setupHamburgerMenu();
+      setupModals();
+      renderWideScreenMenu();
+      renderHamburgerMenu();
 
-    async function removeFavorite(url) {
-      await removeFromFavorites(url);
+      // Function to make an authenticated API call
+      async function fetchWithAuth(url, options = {}) {
+        console.log('fetchWithAuth called'); // Log the function call
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.error('No token found');
+          return;
+        }
+
+        console.log('Token found:', token); // Log the token
+
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        };
+
+        console.log('Making fetch request to:', url); // Log the URL
+
+        const response = await fetch(url, {
+          ...options,
+          headers,
+        });
+
+        console.log('Response status:', response.status); // Log the response status
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.error('Unauthorized: ' + response.statusText);
+          } else {
+            console.error('Network response was not ok: ' + response.statusText);
+          }
+          return;
+        }
+
+        return response.json();
+      }
+
+      // Function to fetch favorite recipes
+      async function fetchFavoriteRecipes() {
+        try {
+          console.log('Fetching favorite recipes'); // Log the function call
+          const data = await fetchWithAuth('/api/favorites/all');
+          if (data) {
+            console.log('Favorite recipes:', data);
+            const favoriteList = document.getElementById('favoriteList');
+            favoriteList.innerHTML = '';
+            data.forEach(recipe => {
+              const li = document.createElement('li');
+              li.textContent = recipe.name; // Adjust based on your data structure
+              favoriteList.appendChild(li);
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching favorite recipes:', error);
+        }
+      }
+
+      // Call the function to fetch favorite recipes
       fetchFavoriteRecipes();
     }
-
-    document.addEventListener('DOMContentLoaded', fetchFavoriteRecipes);
   </script>
 
   <!-- Logout Modal -->
@@ -84,7 +157,5 @@
       <button id="cancelLogoutButton">キャンセル</button>
     </div>
   </div>
-
-  <script src="scripts/main.js" type="module"></script>
 </body>
 </html>

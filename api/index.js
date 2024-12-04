@@ -23,6 +23,11 @@ app.use(express.static(path.join(__dirname, '../public'))); // Adjust the path t
 
 router.use('/api/auth', authRoutes);
 
+// Protected route example
+app.get('/api/protected', verifyToken, (req, res) => {
+  res.json({ message: 'This is protected data', user: req.user });
+});
+
 // Define the API routes
 router.get('/api/recipe', async (req, res) => {
   const url = req.query.url;
@@ -165,7 +170,7 @@ router.get('/api/favorites/all', verifyToken, async (req, res) => {
 });
 
 // Serve the favorite-recipes.html file
-router.get('/favorite-recipes', verifyToken, (req, res) => {
+router.get('/favorite-recipes', (req, res) => {
   res.sendFile(path.join(__dirname, '../public', 'favorite-recipes.html'));
 });
 

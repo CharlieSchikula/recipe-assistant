@@ -73,6 +73,12 @@ header {
   margin: 20px 0px 20px 50px;
   }
 
+@media (max-width: 400px) {
+  .site-title {
+    margin: 20px 0px 20px 20px;
+  }
+}
+
 .site-title h1 {
   margin: 0;
   padding: 0;

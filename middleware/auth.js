@@ -72,31 +72,46 @@ router.post('/login', [
   }
 
   const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+  console.log('Token generated:', token); // Log the generated token
   res.send({ token });
 });
 
 // Verify token middleware
-export const verifyToken = (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
+  console.log('Headers:', req.headers); // Log all headers
   const authHeader = req.headers.authorization;
-  console.log('Authorization header:', authHeader); // Log the Authorization header
+  console.log('Authorization Header:', authHeader); // Log the Authorization header
 
-  const token = authHeader && authHeader.split(' ')[1];
-  console.log('Extracted token:', token); // Log the extracted token
-
-  if (!token) {
-    console.log('Token is missing'); // Log missing token
-    return res.status(401).send({ message: 'Token is required.' });
+  if (!authHeader) {
+    return res.status(401).send('Authorization header is missing');
   }
 
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
-    if (err) {
-      console.log('Token verification failed:', err); // Log token verification error
-      return res.status(401).send({ message: '無効なトークンです。' });
-    }
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return res.status(401).send('Token is missing');
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
     console.log('Decoded token:', decoded); // Log the decoded token
-    req.userId = decoded.userId;
+
+    // Fetch user data from the database
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    req.user = user; // Attach user data to the req object
     next();
-  });
+  } catch (err) {
+    console.log('Token verification failed:', err); // Log token verification error
+    return res.status(401).send({ message: '無効なトークンです。' });
+  }
 };
+
+// // Protected route example
+// app.get('/api/protected', verifyToken, (req, res) => {
+//   res.json({ message: 'This is protected data', user: req.user });
+// });
 
 export default router;
