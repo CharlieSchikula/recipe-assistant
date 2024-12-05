@@ -82,6 +82,20 @@ export function setupModals() {
     });
   }
 
+  // Function to open the login modal
+  function openLoginModal() {
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) {
+      loginModal.style.display = 'block';
+    }
+  }
+
+  // Check if the login modal should be shown
+  if (localStorage.getItem('showLoginModal') === 'true') {
+    openLoginModal();
+    localStorage.removeItem('showLoginModal');
+  }
+
   // Redirect to register modal
   const redirectToRegister = document.getElementById('redirectToRegister');
   if (redirectToRegister) {
@@ -272,7 +286,7 @@ export function setupFormSubmissions() {
   });
 }
 
-export function setupFetchRecipe() {
+export function setupFetchRecipe(url = null) {
   // Function to extract recipe ID from URL
   function extractRecipeId(url) {
     const match = url.match(/\/recipes\/(\d+)(?:-[^\/]*)?/);
@@ -331,8 +345,8 @@ export function setupFetchRecipe() {
   }
 
   // Function to toggle favorite status
-  async function toggleFavorite(url, button) {
-    const isFavorite = await checkIfFavorite(url);
+  async function toggleFavorite(url, title, button) {
+    const isFavorite = await checkIfFavorite(url, title);
     if (isFavorite) {
       await removeFromFavorites(url);
       button.querySelector('#emptyHeart').style.display = 'block';
@@ -340,7 +354,8 @@ export function setupFetchRecipe() {
       console.log('Toggle changed to unfavorite');
     } else {
       const recipeId = extractRecipeId(url);
-      await addToFavorites(recipeId, url);
+      const title = document.getElementById('recipeName').textContent;
+      await addToFavorites(recipeId, url, title);
       button.querySelector('#emptyHeart').style.display = 'none';
       button.querySelector('#filledHeart').style.display = 'block';
       console.log('Toggle changed to favorite');
@@ -348,14 +363,15 @@ export function setupFetchRecipe() {
   }
 
   // Function to check if a recipe is in the favorite list
-  async function checkIfFavorite(url) {
+  async function checkIfFavorite(url, title) {
     try {
       const token = localStorage.getItem('token');
-      console.log("URL to check: " + url);
-      const response = await fetch(`/api/favorites?url=${url}`, {
+      console.log("Check if favorite: " + url);
+      console.log("Check if favorite: " + title);
+      const response = await fetch(`/api/favorites?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`, {
         headers: {
           'Authorization': `Bearer ${token}`
-        }
+        },
       });
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -370,17 +386,18 @@ export function setupFetchRecipe() {
   }
 
   // Function to add a recipe to the favorite list
-  async function addToFavorites(recipeId, url) {
+  async function addToFavorites(recipeId, url, title) {
     const token = localStorage.getItem('token');
     console.log('Recipe ID to add:', recipeId); // Log the recipe ID
     console.log('URL to add:', url); // Log the URL
+    console.log('Title to add:', title); // Log the title
     const response = await fetch(`/api/favorites`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ recipeId, url })
+      body: JSON.stringify({ recipeId, url, title })
     });
     const data = await response.json();
     console.log('Added to favorites response:', data); // Log the response
@@ -401,10 +418,9 @@ export function setupFetchRecipe() {
     console.log('Removed from favorites response:', data); // Log the response
     return data;
   }
-  
-  // Add event listener for Fetch Recipe button
-  document.getElementById('fetchRecipe').addEventListener('click', async () => {
-    const url = document.getElementById('urlInput').value.trim();
+
+  // Function to fetch and display the recipe
+  async function fetchAndDisplayRecipe(url) {
     const errorMessage = document.getElementById('errorMessage');
     const recipeNameBox = document.querySelector('.recipe-name-box');
     const checkAllButton = document.getElementById('checkAll');
@@ -449,7 +465,7 @@ export function setupFetchRecipe() {
         recipeNameText.id = 'recipeName';
         recipeNameText.innerHTML = `<a href="${cleanedUrl}" target="_blank" style="color: inherit; text-decoration: none;">${data.title}</a>`;
         recipeNameBox.appendChild(recipeNameText);
-        
+
         if (isLoggedIn()) {
           const favoriteButton = document.createElement('button');
           favoriteButton.classList.add('favorite-button');
@@ -462,10 +478,10 @@ export function setupFetchRecipe() {
             </svg>
           `;
           recipeNameBox.appendChild(favoriteButton);
-          favoriteButton.addEventListener('click', () => toggleFavorite(cleanedUrl, favoriteButton));
+          favoriteButton.addEventListener('click', () => toggleFavorite(cleanedUrl, data.title, favoriteButton));
 
           // Check if the recipe is already a favorite
-          if (await checkIfFavorite(cleanedUrl)) {
+          if (await checkIfFavorite(cleanedUrl, data.title)) {
             favoriteButton.querySelector('#emptyHeart').style.display = 'none';
             favoriteButton.querySelector('#filledHeart').style.display = 'block';
           }
@@ -489,7 +505,7 @@ export function setupFetchRecipe() {
         searchSubstitutesButton.style.display = 'none'; // Hide the search substitutes button
       } else {
         checkAllButton.style.display = 'inline-block';
-        searchSubstitutesButton.style.display = 'inline-block'; 
+        searchSubstitutesButton.style.display = 'inline-block';
         data.ingredients.forEach(ingredient => {
           const li = document.createElement('li');
           li.className = ingredient.class; // Set the class of the li element
@@ -570,30 +586,41 @@ export function setupFetchRecipe() {
           stepList.appendChild(li);
         });
 
-      // Apply styles based on screen width
-      applyStylesToStepImg();
-    }
+        // Apply styles based on screen width
+        applyStylesToStepImg();
+      }
 
-    // Display advice
-    if (!data.advice) {
-      const noAdviceMessage = document.createElement('p');
-      noAdviceMessage.textContent = 'アドバイスが見つかりませんでした。';
-      noAdviceMessage.classList.add('error-text');
-      adviceInfo.appendChild(noAdviceMessage);
-    } else {
-      adviceInfo.innerHTML = data.advice; // Set the innerHTML to handle multiple <p> tags
-    }
+      // Display advice
+      if (!data.advice) {
+        const noAdviceMessage = document.createElement('p');
+        noAdviceMessage.textContent = 'アドバイスが見つかりませんでした。';
+        noAdviceMessage.classList.add('error-text');
+        adviceInfo.appendChild(noAdviceMessage);
+      } else {
+        adviceInfo.innerHTML = data.advice; // Set the innerHTML to handle multiple <p> tags
+      }
 
-    // Turn off the Check All button
-    document.getElementById('checkAll').checked = false;
+      // Turn off the Check All button
+      document.getElementById('checkAll').checked = false;
 
-    // Add event listeners to new images
-    addImageEventListeners();
+      // Add event listeners to new images
+      addImageEventListeners();
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
       alert('レシピの取得に失敗しました。URLを確認してください。');
     }
+  }
+
+  // Add event listener for Fetch Recipe button
+  document.getElementById('fetchRecipe').addEventListener('click', async () => {
+    const url = document.getElementById('urlInput').value.trim();
+    await fetchAndDisplayRecipe(url);
   });
+
+  // If a URL is provided, fetch and display the recipe
+  if (url) {
+    fetchAndDisplayRecipe(url);
+  }
 
   return {
     fetchRecipe,

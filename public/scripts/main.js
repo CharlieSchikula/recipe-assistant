@@ -3,14 +3,18 @@ import { renderWideScreenMenu, renderHamburgerMenu } from './applyLoggedInStyles
 import { setupHamburgerMenu, setupModals, setupFormSubmissions, setupFetchRecipe, setupSearchSubstitutes } from './setup.js';
 import { addImageEventListeners } from './imageExpansion.js';
 
+const recipeUrl = localStorage.getItem('recipeUrl');
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM fully loaded and parsed'); // Debugging log
 
   setupHamburgerMenu();
   setupModals();
   setupFormSubmissions();
-  setupFetchRecipe();
+  setupFetchRecipe(recipeUrl);
   setupSearchSubstitutes();
+
+  localStorage.removeItem('recipeUrl');
 
   // Apply styles on initial load
   applyStylesToStepImg();

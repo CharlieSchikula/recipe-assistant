@@ -108,6 +108,27 @@ router.get('/api/recipe', async (req, res) => {
   }
 });
 
+// Define the API route to fetch only the title of the recipe
+router.get('/api/recipe/title', async (req, res) => {
+  let url = req.query.url;
+  if (!url) {
+    return res.status(400).send('URL is required');
+  }
+
+  try {
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
+
+    // Scrape title
+    const title = $('h1').text().trim();
+
+    res.json({ title });
+  } catch (error) {
+    console.error('Error fetching recipe title:', error); // Log the error
+    res.status(500).send('Error fetching recipe title');
+  }
+});
+
 // Define the substitutes route
 router.get('/api/substitutes', async (req, res) => {
   const ingredient = req.query.ingredient;
@@ -129,7 +150,7 @@ router.get('/api/substitutes', async (req, res) => {
 
 // Add a recipe to the favorite list
 router.post('/api/favorites', verifyToken, async (req, res) => {
-  const { recipeId, url } = req.body;
+  const { recipeId, url, title } = req.body;
   const email = req.user.email;
 
   console.log('Query parameters:', req.query); // Log the query parameters
@@ -140,9 +161,9 @@ router.post('/api/favorites', verifyToken, async (req, res) => {
   try {
     let favorite = await Favorite.findOne({ email });
     if (!favorite) {
-      favorite = new Favorite({ email, favorites: [{ recipeId, url }] });
+      favorite = new Favorite({ email, favorites: [{ recipeId, url, title }] });
     } else {
-      favorite.favorites.push({ recipeId, url });
+      favorite.favorites.push({ recipeId, url, title });
     }
     await favorite.save();
     res.json({ success: true });
@@ -170,14 +191,24 @@ router.delete('/api/favorites', verifyToken, async (req, res) => {
   }
 });
 
-// Check if a recipe is in the favorite list
+// Check if a recipe is in the favorite list and update the title if necessary
 router.get('/api/favorites', verifyToken, async (req, res) => {
-  const { url } = req.query;
+  const { url, title } = req.query;
   const email = req.user.email;
   console.log("URL to checkIfFavorite:" + url);
+  console.log("Title to checkIfFavorite:" + title);
 
   try {
     const favorite = await Favorite.findOne({ email, 'favorites.url': url });
+    if (favorite) {
+      const existingRecipeIndex = favorite.favorites.findIndex(fav => fav.url === url);
+      if (existingRecipeIndex !== -1) {
+        // Update the title if the recipe already exists
+        favorite.favorites[existingRecipeIndex].title = title;
+        console.log("Title updated in favorites:" + title);
+        await favorite.save();
+      }
+    }
     res.json({ isFavorite: !!favorite }); // Convert favorite to a boolean
   } catch (error) {
     console.error('Error checking if favorite:', error); // Log the error

@@ -18,11 +18,11 @@ function getUserEmail() {
 }
 
 // Function to render the wide screen menu for logged in users
-export function renderWideScreenMenu() {
+export function renderWideScreenMenu(currentPage) {
   const registerButton = document.getElementById('registerButton');
   const loginButton = document.getElementById('loginButton');
   const logoutButton = document.getElementById('logoutButton');
-  const wideScreenMenu = document.querySelector('.wide-screen-menu ul');
+  const wideScreenMenu = document.querySelector('.wide-screen-menu');
 
   if (isLoggedIn()) {
     const email = getUserEmail();
@@ -33,18 +33,44 @@ export function renderWideScreenMenu() {
 
       // Clear existing menu items except the logout button
       wideScreenMenu.innerHTML = '';
-
-      // Add menu items
+      const menuItemsContainer = document.createElement('div');
+      menuItemsContainer.classList.add('logged-in-menu-items');
       wideScreenMenu.innerHTML += `
-        <hr class="logged-in">
-        <li class="login-message logged-in">
-          <span style="color: blue; text-decoration: underline;">${email}</span> でログイン中
-        </li>
-      `;
+      <div class="login-message logged-in">
+        <span style="color: blue; text-decoration: underline;">${email}</span> でログイン中
+      </div>
+    `;
 
-      // Append the logout button as the last item
-      wideScreenMenu.appendChild(logoutButton);
-    } else {
+      // Update menu items based on the current page
+      if (currentPage === 'favorite-recipes') {
+        // Add menu items 
+        menuItemsContainer.innerHTML += `
+              <li id="homeLink" class="logged-in"><a href="/">ホーム</a></li>
+              <li class="logged-in"><a href="#" style="color: gray; pointer-events: none !important; font-size: 1rem; cursor: not-allowed !important;">my代用品(予定)</a></li>
+          `;
+        // Append the logout button as the last item
+        menuItemsContainer.appendChild(logoutButton);
+        wideScreenMenu.appendChild(menuItemsContainer);
+      } else if (currentPage === 'manage-my-substitutes') {
+        // Append the logout button as the last item
+        menuItemsContainer.innerHTML += `
+              <li id="homeLink" class="logged-in"><a href="/">ホーム</a></li>
+              <li class="logged-in"><a href="/favorite-recipes">お気に入りのレシピ</a></li>
+          `;
+        // Append the logout button as the last item
+        menuItemsContainer.appendChild(logoutButton);
+        wideScreenMenu.appendChild(menuItemsContainer);
+      } else {
+        // Append the logout button as the last item
+        menuItemsContainer.innerHTML += `
+              <li class="logged-in"><a href="/favorite-recipes">お気に入りのレシピ</a></li>
+              <li class="logged-in"><a href="#" style="color: gray; pointer-events: none !important; font-size: 1rem; cursor: not-allowed !important;">my代用品(予定)</a></li>
+          `;
+        // Append the logout button as the last item
+        menuItemsContainer.appendChild(logoutButton);
+        wideScreenMenu.appendChild(menuItemsContainer);
+     } 
+    }else {
       console.error('Email is undefined');
     }
   }
@@ -71,8 +97,8 @@ export function renderHamburgerMenu(currentPage) {
       // Update menu items based on the current page
       if (currentPage === 'favorite-recipes') {
         menu.innerHTML = `
-            <li><a href="/" style="font-weight: bold; color: darkcyan;">ホーム</a></li>
-            <li class="logged-in"><a href="/manage-my-substitutes">my代用品を管理</a></li>
+            <li class="logged-in"><a href="/">ホーム</a></li>
+            <li class="logged-in"><a href="#" style="color: gray; pointer-events: none; font-size: 1rem;">my代用品(予定)</a></li>
             <hr class="logged-in">
             <li class="login-message logged-in" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
               <span style="color: blue; text-decoration: underline;">${email}</span> <br> でログイン中
@@ -82,7 +108,7 @@ export function renderHamburgerMenu(currentPage) {
         menu.appendChild(hamburgerLogoutLink);
       } else if (currentPage === 'manage-my-substitutes') {
         menu.innerHTML = `
-            <li class="logged-in"><a href="/" style="font-weight: bold; color: darkcyan;">ホーム</a></li>
+            <li class="logged-in"><a href="/">ホーム</a></li>
             <li class="logged-in"><a href="/favorite-recipes">お気に入りのレシピ</a></li>
             <hr class="logged-in">
             <li class="login-message logged-in" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
@@ -95,13 +121,12 @@ export function renderHamburgerMenu(currentPage) {
         // Add menu items
         menu.innerHTML += `
           <li class="logged-in"><a href="/favorite-recipes">お気に入りのレシピ</a></li>
-          <li class="logged-in"><a href="/manage-my-substitutes">my代用品を管理</a></li>
+            <li class="logged-in"><a href="#" style="color: gray; pointer-events: none; font-size: 1rem;">my代用品(予定)</a></li>
           <hr class="logged-in">
           <li class="login-message logged-in" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
             <span style="color: blue; text-decoration: underline;">${email}</span> <br> でログイン中
           </li>
         `;
-
         // Append the logout link as the last item
         menu.appendChild(hamburgerLogoutLink);
       } 

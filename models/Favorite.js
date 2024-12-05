@@ -8,7 +8,8 @@ const favoriteSchema = new mongoose.Schema({
   favorites: [
     {
       recipeId: { type: String, required: true },
-      url: { type: String, required: true }
+      url: { type: String, required: true },
+      title: { type: String, required: true },
     }
   ]
 });

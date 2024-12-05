@@ -1,0 +1,230 @@
+div.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.container h1 {
+  font-size: 1.5rem;
+  color: darkslategray;
+  margin-bottom: 20px;
+}
+
+p {
+  color: darkslategray;
+  margin-bottom: 20px;
+}
+
+ul#favoriteList {
+  list-style-type: none;
+  padding: 0;
+  margin: 20px auto;
+  max-width: 800px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pagination button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+#prevButton {
+  background-color: #007bff;
+  color: white;
+}
+
+#prevButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+#nextButton {
+  background-color: #007bff;
+  color: white;
+}
+
+#nextButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+#pageIndicator {
+  font-size: 1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+#loadingIndicator {
+  display: flex;
+  justify-content: center;
+  font-size: 1rem;
+  color: gray;
+  margin-top: 20px;
+}
+
+ul#favoriteList li {
+  background-color: #fff;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+ul#favoriteList li a {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.fav-search-recipe-button, ul#favoriteList li button.delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 5px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  height: 40px;
+  min-width: 60px; /* Set a fixed width for the button */
+  font-weight: bold; /* Ensure the font is bold */
+  text-align: center;
+}
+
+.fav-search-recipe-button {
+  background-color: darkcyan;
+  color: #fff;
+}
+
+.fav-search-recipe-button:hover {
+  background-color: #007b7f;
+}
+
+ul#favoriteList li button.delete-button {
+  background-color: #ff4d4d;
+  color: #fff;
+}
+
+ul#favoriteList li button.delete-button:hover {
+  background-color: #ff1a1a;
+}
+
+/* Container for buttons to manage spacing */
+.fav-recipe-buttons {
+  display: flex;
+  gap: 10px; /* Space between buttons */
+}
+
+@media (max-width: 480px) {
+  .fav-recipe-buttons {
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 5px; /* Space between buttons */
+  }
+
+  .fav-search-recipe-button, ul#favoriteList li button.delete-button {
+    height: 32px;
+    width: 100%; /* Full width for the button */
+  }
+
+  ul#favoriteList li {
+    padding: 6px 10px;
+  }
+
+  ul#favoriteList li a {
+    font-size: 1rem;
+  }
+}
+
+/* confirm-delete modal styles */
+#confirmDeleteModal .modal-content {
+  max-width: 400px; /* Maximum width for the logout modal */
+  text-align: center; /* Center-align text and buttons */
+}
+
+#confirmDeleteModal p {
+  margin-bottom: 20px;
+}
+
+#confirmDeleteButton {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  margin: 10px;
+  background-color: #ff4d4d;
+  color: white;
+}
+
+#confirmDeleteButton:hover {
+  background-color: #ff1a1a;
+}
+
+#cancelDeleteButton {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin: 10px;
+  border: 2px solid darkslategray;
+}
+
+#cancelDeleteButton:hover {
+  background-color: #dddddd;
+}
+
+#noFavoritesMessage {
+  font-size: 1.2rem;
+  color: darkslategray;
+  text-align: center;
+  margin-top: 20px;
+  font-style: italic;
+}
+
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+#searchInput {
+  flex: 1;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-width: 125px;
+}
+
+#filterButton {
+  padding: 6px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: #aaaaaa;
+  color: white;
+  max-height: 40px;
+}
+
+#filterButton:hover {
+  background-color: #007b7f;
+}
+
+#filterInput {
+  margin-left: 5px;
+  border: 1px solid #aaa;
+  height: 30px;
+  width: 200px;
+}

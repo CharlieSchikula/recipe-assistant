@@ -1,4 +1,3 @@
-
 /* basic styles */
 body {
   background-color: white;
@@ -18,7 +17,7 @@ body {
 .container {
   margin: 0 auto;
   padding: 20px;
-  max-width: 96%;
+  max-width: min(96%, 1200px);
 }
 
 h1 {
@@ -95,6 +94,7 @@ header {
 
 .wide-screen-menu ul {
   display: flex;
+  flex-direction: column;
   gap: 5px; /* Add some space between the buttons */
   position: absolute;
   top: 25px;
@@ -103,8 +103,54 @@ header {
   align-items: center;
 }
 
+.header-buttons {
+  display: flex;
+  flex-direction: row !important;
+  gap: 10px;
+}
+
+.logged-in-menu-items {
+  display: flex;
+  gap: 10px;
+  margin-right: 10px;
+}
+
+.logged-in-menu-items li {
+  list-style: none;
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 1.25rem;
+  font-weight: bold;
+  z-index: 1000;
+  margin: 10px;
+}
+
+.logged-in-menu-items li a {
+  text-decoration: underline;
+  color: darkslategray
+}
+
+.logged-in-menu-items li a:hover {
+  color: darkcyan;
+}
+
+.wide-screen-menu .login-message {
+  text-align: right;
+  margin: 10px 20px 10px 0;
+}
+
 #loginButton, #logoutButton, #registerButton, .submit-button {
   padding: 8px 16px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  z-index: 1000;
+  margin: 10px;
+}
+
+#logoutButton {
+  padding: 6px 12px;
   cursor: pointer;
   font-size: 1rem;
   font-weight: bold;
@@ -173,6 +219,15 @@ header {
   transition: transform 0.3s ease; /* Add transition for sliding effect */
 }
 
+.hamburger-menu.open ul li a{
+  color: darkslategray;
+  font-weight: 700;
+}
+
+.hamburger-menu.open ul li a:hover {
+  color: darkcyan;
+}
+
 .menu-header {
   display: flex;
   justify-content: flex-end; /* Align the close button to the right */
@@ -198,6 +253,10 @@ header {
 
 #hamburgerLoginLink, #hamburgerRegisterLink, #hamburgerLogoutLink {
   cursor: pointer;
+}
+
+#hamburgerLoginLink:hover, #hamburgerRegisterLink:hover, #hamburgerLogoutLink:hover {
+  color: darkcyan;
 }
 
 #hamburgerLogoutLink {
@@ -486,7 +545,7 @@ input:checked + .slider:before {
   border-radius: 8px;
   cursor: pointer;
   height: 40px;
-  min-width: 65px; /* Set a fixed width for the button */
+  min-width: 60px; /* Set a fixed width for the button */
   font-weight: bold; /* Ensure the font is bold */
 }
 
@@ -529,11 +588,19 @@ input:checked + .slider:before {
   margin-right: 10px; /* Add some space between the recipe name and the favorite button */
 } 
 
+@media (max-width: 480px) {
+  #recipeName {
+    font-size: 1.5rem;
+    text-align: center; /* Center the recipe name on narrow screens */
+    margin-right: 0; /* Remove margin on narrow screens */
+  }
+}
+
 .favorite-button {
   background-color: transparent; /* Ensure the background is transparent */
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding-left: 5px;
   display: flex;
   align-items: center;
 }
@@ -970,3 +1037,4 @@ input:checked + .slider:before {
     margin-bottom: 20px; /* Add some space between steps and advice */
   }
 }
+
