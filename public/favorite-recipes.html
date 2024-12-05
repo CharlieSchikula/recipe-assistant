@@ -87,6 +87,7 @@
     const recipesPerPage = 10;
     let searchQuery = ''; // Initialize searchQuery as an empty string
     let allRecipes = []; // Store all recipes
+    let isAuthorized = false; // Store authorization status
 
     // Function to check token validity
     function checkToken() {
@@ -121,6 +122,7 @@
     }
 
     if (checkToken()) {
+      isAuthorized = true; // Set authorization status
       setupHamburgerMenu();
       setupModals();
       renderWideScreenMenu('favorite-recipes');
@@ -159,29 +161,29 @@
       // Function to fetch favorite recipes
       async function fetchFavoriteRecipes(page = 1, searchQuery = '') {
         try {
+          console.log('Fetching favorite recipes'); // Log the function call
           const loadingIndicator = document.getElementById('loadingIndicator');
           loadingIndicator.style.display = 'block'; // Show loading indicator
 
           if (allRecipes.length === 0) {
             // Fetch all recipes only if not already fetched
-            console.log('Fetching favorite recipes'); // Log the function call
             const data = await fetchWithAuth('/api/favorites/all');
+            console.log('Fetching favorite recipes for the first time'); // Log the function call
             allRecipes = data || [];
-            console.log('Favorite recipes:', allRecipes);
           }
 
-          const data = await fetchWithAuth('/api/favorites/all');
           const favoriteList = document.getElementById('favoriteList');
           const noFavoritesMessage = document.getElementById('noFavoritesMessage');
           const prevButton = document.getElementById('prevButton');
           const nextButton = document.getElementById('nextButton');
           const pageIndicator = document.getElementById('pageIndicator');
 
-          if (data && data.length > 0) {
+          if (allRecipes.length > 0) {
+            console.log('Favorite recipes:', allRecipes);
             favoriteList.innerHTML = '';
 
             // Filter recipes based on search query
-            const filteredRecipes = data.filter(recipe => recipe.title.includes(searchQuery));
+            const filteredRecipes = allRecipes.filter(recipe => recipe.title.includes(searchQuery));
 
             const startIndex = (page - 1) * recipesPerPage;
             const endIndex = startIndex + recipesPerPage;
@@ -207,7 +209,8 @@
             // Add event listeners to delete buttons
             document.querySelectorAll('.delete-button').forEach(button => {
               button.addEventListener('click', (event) => {
-                if (!checkToken()) return; // Check token validity before proceeding
+                console.log('Delete button clicked. isAuthorized:', isAuthorized);
+                if (!isAuthorized) return; // Check authorization status before proceeding
                 recipeIdToDelete = event.target.getAttribute('data-recipe-id');
                 openConfirmDeleteModal();
               });
@@ -226,8 +229,8 @@
             prevButton.disabled = page === 1;
             nextButton.disabled = page === totalPages;
 
-            prevButton.onclick = () => fetchFavoriteRecipes(page - 1);
-            nextButton.onclick = () => fetchFavoriteRecipes(page + 1);
+            prevButton.onclick = () => fetchFavoriteRecipes(page - 1, searchQuery);
+            nextButton.onclick = () => fetchFavoriteRecipes(page + 1, searchQuery);
 
             // Show pagination and page indicator
             prevButton.style.display = 'inline-block';
@@ -256,7 +259,7 @@
       async function removeFromFavorites(url) {
         const token = localStorage.getItem('token');
         console.log('Removing recipe from favorites:', url);
-        const response = await fetch(`/api/favorites?url=${url}`, {
+        const response = await fetch(`/api/favorites?url=${encodeURIComponent(url)}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -303,7 +306,8 @@
             if (urlElement) {
               const url = urlElement.href;
               await removeFromFavorites(url);
-              fetchFavoriteRecipes(); // Refresh the list
+              allRecipes = allRecipes.filter(recipe => recipe.url !== url); // Remove from stored data
+              fetchFavoriteRecipes(currentPage, searchQuery); // Refresh the list
               closeConfirmDeleteModal();
             } else {
               console.error('URL element not found');
@@ -320,11 +324,20 @@
         closeConfirmDeleteModal();
       });
 
-      // Add event listener for search input
-      document.getElementById('filterInput').addEventListener('input', () => {
+      // Debounce function to limit the rate at which a function can fire
+      function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
+
+      // Add event listener for search input with debounce
+      document.getElementById('filterInput').addEventListener('input', debounce(() => {
         searchQuery = document.getElementById('filterInput').value.trim();
         fetchFavoriteRecipes(1, searchQuery);
-      });
+      }, 300));
 
       // Fetch and display favorite recipes on page load
       document.addEventListener('DOMContentLoaded', () => fetchFavoriteRecipes(currentPage));
