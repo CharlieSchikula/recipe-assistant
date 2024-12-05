@@ -526,32 +526,42 @@ input:checked + .slider:before {
 #recipeName {
   font-size: 2rem;
   color: darkslategray;
+  margin-right: 10px; /* Add some space between the recipe name and the favorite button */
 } 
 
 .favorite-button {
-  background-color: white;
-  color: pink;
+  background-color: transparent; /* Ensure the background is transparent */
   border: none;
   cursor: pointer;
-  font-size: 1.75rem;
-  padding: 1rem 0 1rem 1rem;
-  border-radius: 50%;
-  transition: background-color 0.3s, color 0.3s;
+  padding: 0;
+  display: flex;
+  align-items: center;
 }
 
-.favorite-button.favorited {
-  background-color: white;
-  color: red;
+.favorite-button svg {
+  min-width: 24px; /* Set a fixed width for the SVG */
+  min-height: 24px; /* Set a fixed height for the SVG */
+  transition: fill 0.3s, stroke 0.3s;
+}
+
+.favorite-button svg#emptyHeart {
+  fill: lightgray; /* Set the filled heart color */
+  stroke: lightgray;
+}
+
+.favorite-button svg#filledHeart {
+  fill: crimson;
+  stroke: crimson;
 }
 
 /* layout for recipe contents */
 .ingredients, .steps, .advice {
   margin-bottom: 20px;
   padding: 20px 25px;
-  /* 最後に消す */
+  /* Delete before hosting */
   border: 1px solid #ccc;
   border-radius: 8px;
-  /* 最後に消す */
+  /* Delet before hosting */
   background-color: #fff;
   min-height: 85px; /* Set a minimum height for consistency */
 }

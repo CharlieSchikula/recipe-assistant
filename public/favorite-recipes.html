@@ -18,7 +18,7 @@
         <ul class="header-buttons">
           <li id="loginButton">ログイン</li>
           <li id="registerButton">アカウントを作る</li>
-          <li id="logoutButton">ログアウト</li>
+          <li id="logoutButton" class="logged-in">ログアウト</li>
         </ul>
       </nav>
       <!-- Narrow screen menu -->
@@ -35,7 +35,7 @@
           <ul>
             <li id="hamburgerRegisterLink">アカウントを作る</li>
             <li id="hamburgerLoginLink">ログイン</li>
-            <li id="hamburgerLogoutLink">ログアウト</li>
+            <li id="hamburgerLogoutLink" class="logged-in">ログアウト</li>
           </ul>
         </div>
       </div>
@@ -45,7 +45,7 @@
     <h1>お気に入りのレシピ</h1>
     <ul id="favoriteList"></ul>
   </div>
-  <script type="module">
+  <script type="module">    
     import { setupHamburgerMenu, setupModals } from './scripts/setup.js';
     import { renderWideScreenMenu, renderHamburgerMenu } from './scripts/applyLoggedInStyles.js';
 
@@ -62,7 +62,7 @@
         const payload = JSON.parse(atob(token.split('.')[1]));
         const exp = payload.exp * 1000;
         if (Date.now() >= exp) {
-          alert('トークンの有効期限が切れています。ログインし直してください');
+          alert('トークンの有効期限が切れました。ログインし直してください');
           localStorage.removeItem('token');
           window.location.href = '/';
           return false;

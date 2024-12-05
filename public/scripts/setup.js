@@ -273,6 +273,12 @@ export function setupFormSubmissions() {
 }
 
 export function setupFetchRecipe() {
+  // Function to extract recipe ID from URL
+  function extractRecipeId(url) {
+    const match = url.match(/\/recipes\/(\d+)(?:-[^\/]*)?/);
+    return match ? match[1] : null;
+  }
+  
   // Function to fetch recipe
   async function fetchRecipe(url) {
     try {
@@ -290,34 +296,63 @@ export function setupFetchRecipe() {
 
   // Function to check if the user is logged in
   function isLoggedIn() {
-    return !!localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expiration = payload.exp * 1000;
+    if (Date.now() >= expiration) {
+      showTokenExpiredPopup();
+      return false;
+    }
+
+    return true;
+  }
+
+  // Function to show token expired popup and auto logout
+  function showTokenExpiredPopup() {
+    alert('トークンの有効期限が切れました。ログインし直してください');
+    autoLogout();
+  }
+
+  // Function to auto logout
+  function autoLogout() {
+    localStorage.removeItem('token');
+    window.location.reload(); // Reload the page to update the menu
+    openLoginModal(); // Call the function to open the login modal
+  }
+
+  // Function to open the login modal
+  function openLoginModal() {
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) {
+      loginModal.style.display = 'block';
+    }
   }
 
   // Function to toggle favorite status
-  async function toggleFavorite(recipeId, button) {
-    const isFavorite = await checkIfFavorite(recipeId);
+  async function toggleFavorite(url, button) {
+    const isFavorite = await checkIfFavorite(url);
     if (isFavorite) {
-      await fetch(`/api/favorites?recipeId=${recipeId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      await removeFromFavorites(url);
       button.querySelector('#emptyHeart').style.display = 'block';
       button.querySelector('#filledHeart').style.display = 'none';
+      console.log('Toggle changed to unfavorite');
     } else {
-      await addToFavorites(recipeId);
+      const recipeId = extractRecipeId(url);
+      await addToFavorites(recipeId, url);
       button.querySelector('#emptyHeart').style.display = 'none';
       button.querySelector('#filledHeart').style.display = 'block';
+      console.log('Toggle changed to favorite');
     }
   }
 
   // Function to check if a recipe is in the favorite list
-  async function checkIfFavorite(recipeId) {
+  async function checkIfFavorite(url) {
     try {
       const token = localStorage.getItem('token');
-      // console.log('Token from localStorage:', token); // Log the token from localStorage
-      const response = await fetch(`/api/favorites?recipeId=${recipeId}`, {
+      console.log("URL to check: " + url);
+      const response = await fetch(`/api/favorites?url=${url}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -326,6 +361,7 @@ export function setupFetchRecipe() {
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
+      console.log("Is favorite: " + data.isFavorite);
       return data.isFavorite;
     } catch (error) {
       console.error('Error checking if favorite:', error);
@@ -334,32 +370,35 @@ export function setupFetchRecipe() {
   }
 
   // Function to add a recipe to the favorite list
-  async function addToFavorites(recipeId) {
+  async function addToFavorites(recipeId, url) {
     const token = localStorage.getItem('token');
-    // console.log('Token from localStorage:', token); // Log the token from localStorage
-    const response = await fetch(`/api/favorites?recipeId=${recipeId}`, {
+    console.log('Recipe ID to add:', recipeId); // Log the recipe ID
+    console.log('URL to add:', url); // Log the URL
+    const response = await fetch(`/api/favorites`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ recipeId })
+      body: JSON.stringify({ recipeId, url })
     });
     const data = await response.json();
+    console.log('Added to favorites response:', data); // Log the response
     return data;
   }
 
   // Function to remove a recipe from the favorite list
-  async function removeFromFavorites(recipeId) {
+  async function removeFromFavorites(url) {
     const token = localStorage.getItem('token');
-    // console.log('Token from localStorage:', token); // Log the token from localStorage
-    const response = await fetch(`/api/favorites?recipeId=${recipeId}`, {
+    console.log( "URL to remove: " + url);
+    const response = await fetch(`/api/favorites?url=${url}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
     const data = await response.json();
+    console.log('Removed from favorites response:', data); // Log the response
     return data;
   }
   
@@ -385,11 +424,12 @@ export function setupFetchRecipe() {
       return;
     }
 
-    const cleanedUrl = "https://cookpad.com/jp/recipes/"+url.match(/\/recipes\/(\d+)-/)[1];
+    const recipeId = extractRecipeId(url);
+    const cleanedUrl = "https://cookpad.com/jp/recipes/" + recipeId;
 
     console.log(`Fetching recipe from URL: ${cleanedUrl}`);
     try {
-      const data = await fetchRecipe(url);
+      const data = await fetchRecipe(cleanedUrl);
       console.log('Recipe data received:', data);
       const ingredientList = document.getElementById('ingredientList');
       const stepList = document.getElementById('stepList');
@@ -407,7 +447,6 @@ export function setupFetchRecipe() {
       if (data.title) {
         const recipeNameText = document.createElement('h1');
         recipeNameText.id = 'recipeName';
-        const cleanedUrl = "https://cookpad.com/jp/recipes/"+url.match(/\/recipes\/(\d+)-/)[1];
         recipeNameText.innerHTML = `<a href="${cleanedUrl}" target="_blank" style="color: inherit; text-decoration: none;">${data.title}</a>`;
         recipeNameBox.appendChild(recipeNameText);
         
@@ -415,18 +454,18 @@ export function setupFetchRecipe() {
           const favoriteButton = document.createElement('button');
           favoriteButton.classList.add('favorite-button');
           favoriteButton.innerHTML = `
-            <svg id="emptyHeart" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            <svg id="emptyHeart" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="feather feather-heart";">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
             </svg>
             <svg id="filledHeart" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="feather feather-heart" style="display: none;">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
             </svg>
           `;
           recipeNameBox.appendChild(favoriteButton);
-          favoriteButton.addEventListener('click', () => toggleFavorite(data.id, favoriteButton));
+          favoriteButton.addEventListener('click', () => toggleFavorite(cleanedUrl, favoriteButton));
 
           // Check if the recipe is already a favorite
-          if (await checkIfFavorite(url)) {
+          if (await checkIfFavorite(cleanedUrl)) {
             favoriteButton.querySelector('#emptyHeart').style.display = 'none';
             favoriteButton.querySelector('#filledHeart').style.display = 'block';
           }

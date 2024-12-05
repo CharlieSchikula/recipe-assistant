@@ -30,25 +30,34 @@ app.get('/api/protected', verifyToken, (req, res) => {
 
 // Define the API routes
 router.get('/api/recipe', async (req, res) => {
-  const url = req.query.url;
+  let url = req.query.url;
   if (!url) {
     return res.status(400).send('URL is required');
   }
+
+  console.log('URL:', url); // Log the URL
 
   try {
     const { data } = await axios.get(url);
     const $ = cheerio.load(data);
 
-    let id = "";
+    // Function to extract recipe ID from URL
+    function extractRecipeId(url) {
+      const match = url.match(/\/recipes\/(\d+)(?:-[^\/]*)?/);
+      return match ? match[1] : null;
+    }
+
+    let id = extractRecipeId(url);
     let title = '';
     const ingredients = [];
     const steps = [];
     let servings = '';
     let advice = '';
 
-    // Scrape recipe id
-    id = url.match(/\/recipes\/(\d+)-/)[1];
-
+    if (!id) {
+      return res.status(400).send('Invalid URL format');
+    }
+    
     // Scrape title
     title = $('h1').text().trim();
 
@@ -92,7 +101,7 @@ router.get('/api/recipe', async (req, res) => {
     // console.log('Servings:', servings);
     // console.log('Advice:', advice);
 
-    res.json({ id, title, ingredients, steps, servings, advice });
+    res.json({ url, id, title, ingredients, steps, servings, advice });
   } catch (error) {
     console.error('Error fetching recipe:', error);
     res.status(500).send('Error fetching recipe');
@@ -120,43 +129,58 @@ router.get('/api/substitutes', async (req, res) => {
 
 // Add a recipe to the favorite list
 router.post('/api/favorites', verifyToken, async (req, res) => {
-  const { recipeId } = req.body;
+  const { recipeId, url } = req.body;
   const email = req.user.email;
 
   console.log('Query parameters:', req.query); // Log the query parameters
   console.log('User email:', email); // Log the user email
+  console.log('Recipe ID:', recipeId); // Log the recipe ID
+  console.log('URL:', url); // Log the URL
 
   try {
-    const favorite = new Favorite({ email, recipeId, url: `https://cookpad.com/recipe/${recipeId}` });
+    let favorite = await Favorite.findOne({ email });
+    if (!favorite) {
+      favorite = new Favorite({ email, favorites: [{ recipeId, url }] });
+    } else {
+      favorite.favorites.push({ recipeId, url });
+    }
     await favorite.save();
     res.json({ success: true });
   } catch (error) {
+    console.error('Error adding to favorites:', error); // Log the error
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
 // Remove a recipe from the favorite list
 router.delete('/api/favorites', verifyToken, async (req, res) => {
-  const { recipeId } = req.query;
+  const { url } = req.query;
   const email = req.user.email;
 
   try {
-    await Favorite.findOneAndDelete({ email, recipeId });
+    const favorite = await Favorite.findOne({ email });
+    if (favorite) {
+      favorite.favorites = favorite.favorites.filter(fav => fav.url !== url);
+      await favorite.save();
+    }
     res.json({ success: true });
   } catch (error) {
+    console.error('Error removing from favorites:', error); // Log the error
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
 // Check if a recipe is in the favorite list
 router.get('/api/favorites', verifyToken, async (req, res) => {
-  const { recipeId } = req.query;
+  const { url } = req.query;
   const email = req.user.email;
+  console.log("URL to checkIfFavorite:" + url);
 
   try {
-    const favorite = await Favorite.findOne({ email, recipeId });
+    const favorite = await Favorite.findOne({ email, 'favorites.url': url });
     res.json({ isFavorite: !!favorite }); // Convert favorite to a boolean
   } catch (error) {
+    console.error('Error checking if favorite:', error); // Log the error
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -166,9 +190,10 @@ router.get('/api/favorites/all', verifyToken, async (req, res) => {
   const email = req.user.email;
 
   try {
-    const favorites = await Favorite.find({ email });
-    res.json(favorites);
+    const favorite = await Favorite.findOne({ email });
+    res.json(favorite ? favorite.favorites : []);
   } catch (error) {
+    console.error('Error fetching all favorites:', error); // Log the error
     res.status(500).json({ success: false, message: error.message });
   }
 });

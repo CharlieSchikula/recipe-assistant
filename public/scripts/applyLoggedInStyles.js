@@ -36,8 +36,8 @@ export function renderWideScreenMenu() {
 
       // Add menu items
       wideScreenMenu.innerHTML += `
-        <hr>
-        <li class="login-message">
+        <hr class="logged-in">
+        <li class="login-message logged-in">
           <span style="color: blue; text-decoration: underline;">${email}</span> でログイン中
         </li>
       `;
@@ -72,9 +72,9 @@ export function renderHamburgerMenu(currentPage) {
       if (currentPage === 'favorite-recipes') {
         menu.innerHTML = `
             <li><a href="/" style="font-weight: bold; color: darkcyan;">ホーム</a></li>
-            <li><a href="/manage-my-substitutes">my代用品を管理</a></li>
-            <hr>
-            <li class="login-message" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
+            <li class="logged-in"><a href="/manage-my-substitutes">my代用品を管理</a></li>
+            <hr class="logged-in">
+            <li class="login-message logged-in" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
               <span style="color: blue; text-decoration: underline;">${email}</span> <br> でログイン中
             </li>
           `;
@@ -82,10 +82,10 @@ export function renderHamburgerMenu(currentPage) {
         menu.appendChild(hamburgerLogoutLink);
       } else if (currentPage === 'manage-my-substitutes') {
         menu.innerHTML = `
-            <li><a href="/" style="font-weight: bold; color: darkcyan;">ホーム</a></li>
-            <li><a href="/favorite-recipes">お気に入りのレシピ</a></li>
-            <hr>
-            <li class="login-message" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
+            <li class="logged-in"><a href="/" style="font-weight: bold; color: darkcyan;">ホーム</a></li>
+            <li class="logged-in"><a href="/favorite-recipes">お気に入りのレシピ</a></li>
+            <hr class="logged-in">
+            <li class="login-message logged-in" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
               <span style="color: blue; text-decoration: underline;">${email}</span> <br> でログイン中
             </li>
           `;
@@ -94,10 +94,10 @@ export function renderHamburgerMenu(currentPage) {
       } else {
         // Add menu items
         menu.innerHTML += `
-          <li><a href="/favorite-recipes">お気に入りのレシピ</a></li>
-          <li><a href="/manage-my-substitutes">my代用品を管理</a></li>
-          <hr>
-          <li class="login-message" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
+          <li class="logged-in"><a href="/favorite-recipes">お気に入りのレシピ</a></li>
+          <li class="logged-in"><a href="/manage-my-substitutes">my代用品を管理</a></li>
+          <hr class="logged-in">
+          <li class="login-message logged-in" style="padding: 10px; font-size: 1rem; line-height: 1.5rem;">
             <span style="color: blue; text-decoration: underline;">${email}</span> <br> でログイン中
           </li>
         `;

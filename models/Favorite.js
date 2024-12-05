@@ -5,14 +5,12 @@ const favoriteSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  url: {
-    type: String,
-    required: true
-  },
-  recipeId: {
-    type: String,
-    required: true
-  }
+  favorites: [
+    {
+      recipeId: { type: String, required: true },
+      url: { type: String, required: true }
+    }
+  ]
 });
 
 const Favorite = mongoose.model('Favorite', favoriteSchema);
