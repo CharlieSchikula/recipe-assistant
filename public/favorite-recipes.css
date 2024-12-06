@@ -192,21 +192,6 @@ ul#favoriteList li button.delete-button:hover {
   font-style: italic;
 }
 
-.search-bar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-#searchInput {
-  flex: 1;
-  padding: 8px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  min-width: 125px;
-}
-
 #filterButton {
   padding: 6px 12px;
   font-size: 1rem;
@@ -224,8 +209,9 @@ ul#favoriteList li button.delete-button:hover {
 
 #filterInput {
   margin-left: 5px;
+  padding: 4px;
   border: 1px solid #aaa;
-  height: 30px;
   width: min(96%, 200px);
-  min-width: 100px;
+  border-radius: 4px;
+  min-width: 125px;
 }

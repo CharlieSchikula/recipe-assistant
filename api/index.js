@@ -5,6 +5,7 @@ import * as cheerio from 'cheerio';
 import authRoutes from '../middleware/auth.js';
 import Substitute from '../models/Substitute.js';
 import Favorite from '../models/Favorite.js';
+import mySubstitute from '../models/MySubstitute.js';
 import { fileURLToPath } from 'url'; // Import fileURLToPath
 import { dirname } from 'path'; // Import dirname
 import { verifyToken } from '../middleware/auth.js';
@@ -229,14 +230,118 @@ router.get('/api/favorites/all', verifyToken, async (req, res) => {
   }
 });
 
+// Fetch all my-substitutes for the authenticated user
+router.get('/api/my-substitutes', verifyToken, async (req, res) => {
+  const email = req.user.email;
+
+  console.log('Fetching substitutes for user:', email); // Log the user email
+
+  try {
+    const substitutes = await mySubstitute.find({ email });
+    res.json(substitutes);
+  } catch (error) {
+    console.error('Error fetching substitutes:', error); // Log the error
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Add or update a substitute in the my-substitutes list
+router.post('/api/my-substitutes', verifyToken, async (req, res) => {
+  const { ingredient, mySubstitutes } = req.body;
+  const email = req.user.email;
+
+  console.log('Adding or updating substitute for user:', email); // Log the user email
+  console.log('Ingredient:', ingredient); // Log the ingredient
+  console.log('Substitutes:', mySubstitutes); // Log the substitutes
+
+  try {
+    let substitute = await mySubstitute.findOne({ email, ingredient });
+    if (!substitute) {
+      substitute = new mySubstitute({ email, ingredient, mySubstitutes });
+    } else {
+      mySubstitutes.forEach(newSub => {
+        const existingSub = substitute.mySubstitutes.id(newSub._id);
+        if (existingSub) {
+          existingSub.originalPortion = newSub.originalPortion;
+          existingSub.substituteName = newSub.substituteName; // Update the name
+          existingSub.substitutePortion = newSub.substitutePortion;
+          existingSub.vegetarian = newSub.vegetarian;
+        } else {
+          substitute.mySubstitutes.push(newSub);
+        }
+      });
+    }
+    await substitute.save();
+    res.json({ success: true, substitute });
+  } catch (error) {
+    console.error('Error adding or updating substitute:', error); // Log the error
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Update a substitute in the my-substitutes list
+router.put('/api/my-substitutes/:id', verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const { ingredient, mySubstitutes } = req.body;
+  const email = req.user.email;
+
+  console.log('Updating substitute for user:', email); // Log the user email
+  console.log('Ingredient:', ingredient); // Log the ingredient
+  console.log('Substitutes:', mySubstitutes); // Log the substitutes
+
+  try {
+    let substitute = await mySubstitute.findOne({ email, ingredient });
+    if (!substitute) {
+      return res.status(404).json({ success: false, message: 'Substitute not found' });
+    }
+
+    const existingSub = substitute.mySubstitutes.id(id);
+    if (existingSub) {
+      const newSub = mySubstitutes[0];
+      existingSub.originalPortion = newSub.originalPortion;
+      existingSub.substituteName = newSub.substituteName; // Update the name
+      existingSub.substitutePortion = newSub.substitutePortion;
+      existingSub.vegetarian = newSub.vegetarian;
+      await substitute.save();
+      res.json({ success: true, substitute });
+    } else {
+      res.status(404).json({ success: false, message: 'Substitute not found' });
+    }
+  } catch (error) {
+    console.error('Error updating substitute:', error); // Log the error
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Remove a substitute from the my-substitutes list
+router.delete('/api/my-substitutes/:id', verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const email = req.user.email;
+
+  console.log('Removing substitute for user:', email); // Log the user email
+  console.log('Substitute ID:', id); // Log the substitute ID
+
+  try {
+    const substitute = await mySubstitute.findOne({ email });
+    if (substitute) {
+      substitute.mySubstitutes = substitute.mySubstitutes.filter(sub => sub._id.toString() !== id);
+      await substitute.save();
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error removing substitute:', error); // Log the error
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Serve the favorite-recipes.html file
 router.get('/favorite-recipes', (req, res) => {
   res.sendFile(path.join(__dirname, '../public', 'favorite-recipes.html'));
 });
 
-// Serve the manage-my-substitutes.html file
-router.post('/manage-my-substitutes', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public', 'manage-my-substitutes.html'));
+// Serve the my-substitutes.html file
+router.get('/my-substitutes', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public', 'my-substitutes.html'));
 });
 
 // Use the router

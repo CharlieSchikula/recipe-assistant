@@ -1,0 +1,390 @@
+div.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.container h1, #modalTitle {
+  font-size: 1.5rem;
+  color: darkslategray;
+  margin-bottom: 20px;
+}
+
+p {
+  color: darkslategray;
+  margin-bottom: 20px;
+}
+
+#mySubstitutesList ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 10px auto;
+  max-width: 800px;
+}
+
+#mySubstitutesList li {
+  display: flex;
+  flex-direction: column;
+}
+
+.substitute-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.substitute-content div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.substitute-content div ul {
+  display: flex;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .substitute-content div ul {
+    flex-wrap: wrap;
+  }
+}
+
+.substitute-content div ul li{
+  min-width: 100px;
+  padding: 0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pagination button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+#prevButton {
+  background-color: #007bff;
+  color: white;
+}
+
+#prevButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+#nextButton {
+  background-color: #007bff;
+  color: white;
+}
+
+#nextButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+#pageIndicator {
+  font-size: 1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+#loadingIndicator {
+  display: flex;
+  justify-content: center;
+  font-size: 1rem;
+  color: gray;
+  margin-top: 20px;
+}
+
+#mySubstitutesList div {
+  max-width: 100%;
+}
+
+/* Container for buttons to manage spacing */
+.my-substitutes-buttons {
+  display: flex;
+  gap: 10px; /* Space between buttons */
+}
+
+/* confirm-delete modal styles */
+.modal-content {
+  max-width: 800px; /* Maximum width for the logout modal */
+  text-align: center; /* Center-align text and buttons */
+}
+
+#deleteSubstituteModal .modal-content {
+  max-width: 400px;
+}
+
+#confirmDeleteSubstituteButton {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  margin: 10px;
+  background-color: #ff4d4d;
+  color: white;
+}
+
+#confirmDeleteSubstituteButton:hover {
+  background-color: #ff1a1a;
+}
+
+#cancelDeleteSubstituteButton {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin: 10px;
+  border: 2px solid darkslategray;
+}
+
+#cancelDeleteSubstituteButton:hover {
+  background-color: #dddddd;
+}
+
+#noMySubstitutesMessage, #noFilteredIngredientsMessage, #noFilteredSubstitutesMessage {
+  font-size: 1.2rem;
+  color: darkslategray;
+  text-align: center;
+  margin-top: 20px;
+  font-style: italic;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+#filterInputForIngredients, #filterInputForSubstitutes {
+  flex: 1;
+  padding: 4px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: min(46%, 200px);
+}
+
+#filterButton {
+  padding: 6px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: #aaaaaa;
+  color: white;
+  max-height: 40px;
+}
+
+#filterButton:hover {
+  background-color: #007b7f;
+}
+
+.ingredient-box {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 20px;
+  width: 800px;
+}
+
+.ingredient-header {
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: darkslategray;
+}
+
+.substitute-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.substitute-table th, .substitute-table td {
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 6px;
+}
+
+.substitute-table th {
+  background-color: #eee;
+}
+
+.substitute-table th:nth-child(1),
+.substitute-table th:nth-child(3),
+.substitute-table td:nth-child(1),
+.substitute-table td:nth-child(3) {
+  width: 30%;
+}
+
+.substitute-table th:nth-child(2),
+.substitute-table td:nth-child(2) {
+  width: 40%;
+}
+
+.substitute-table th:nth-child(4),
+.substitute-table td:nth-child(4) {
+  min-width: 45px;
+  text-align: center;
+}
+
+.substitute-table th:nth-child(5),
+.substitute-table td:nth-child(5) {
+  width: auto;
+}
+
+/* Underline ingredient */
+.underline {
+  text-decoration: underline;
+}
+
+.my-substitutes-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .substitute-table th:nth-child(4), .substitute-table td:nth-child(4) {
+    min-width: 35px;
+    font-size: 0.875rem;
+    padding: 4px;
+  }
+}
+
+.substitute-table th:nth-child(5), .substitute-table td:nth-child(5) {
+  width: 150px;
+  align-items: center;
+  text-align: center;
+}
+
+.substitute-table .my-substitutes-button {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.edit-substitute-button, .delete-substitute-button {
+  padding: 5px 5px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  height: 40px;
+  min-width: 60px;
+  font-weight: bold; /* Ensure the font is bold */
+}
+
+.edit-substitute-button {
+  background-color: darkcyan;
+  color: #fff;
+}
+
+.edit-substitute-button:hover {
+  background-color: #007b7f;
+}
+
+.delete-substitute-button {
+  background-color: #ff4d4d;
+  color: #fff;
+}
+
+.delete-substitute-button:hover {
+  background-color: #ff1a1a;
+}
+
+.veg {
+  color: darkgreen;
+}
+
+/* Add/Edit Substitute Modal */
+.modal-content label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.modal-content input[type="text"] {
+  width: 100%;
+  margin: 5px 0;
+}
+
+.modal-content input[readonly] {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+/* Flexbox styling for ingredient header */
+.ingredient-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ingredient-header label {
+  margin: 0 10px 0 0; /* Add space to the right of the label */
+  white-space: nowrap;
+  display: flex;
+  align-items: center; /* Vertically center the label */
+}
+
+.ingredient-header input {
+  flex: 1;
+}
+
+/* Button container styling */
+.button-container {
+  text-align: right;
+  margin-top: 10px;
+}
+
+.button-container button {
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+/* Clear autofill styles */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #000 !important;
+}
+
+/* Responsive styling for narrow screens */
+@media (max-width: 480px) {
+  .my-substitutes-button {
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .edit-substitute-button, .delete-substitute-button {
+    min-height: 32px;
+    min-width: 48px; /* Full width for the button */
+    padding: 2px;
+    font-size: 0.875rem;
+  }
+
+  ul#mySubstitutesList li {
+    padding: 6px 10px;
+  }
+
+  ul#mySubstitutesList li a {
+    font-size: 1rem;
+  }
+
+  .substitute-table th:nth-child(5), .substitute-table td:nth-child(5) {
+    width: auto;
+  }
+}

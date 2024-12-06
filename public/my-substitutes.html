@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>my代用品</title>
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="my-substitutes.css">
+  </head>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="site-title">
+        <h1>Recipe Assistant <span class="title-break">for Cookpad</span></h1>
+      </div>
+      <!-- Wide screen menu -->
+      <nav class="wide-screen-menu">
+        <ul class="header-buttons">
+          <li id="loginButton">ログイン</li>
+          <li id="registerButton">アカウントを作る</li>
+          <li id="logoutButton" class="logged-in">ログアウト</li>
+        </ul>
+      </nav>
+      <!-- Narrow screen menu -->
+      <div class="narrow-screen-menu">
+        <button id="hamburgerButton">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="30px" height="30px">
+            <path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/>
+          </svg>
+        </button>
+        <div id="hamburgerMenu" class="hamburger-menu">
+          <div class="menu-header">
+            <button id="closeMenuButton">×</button>
+          </div>
+          <ul>
+            <li id="hamburgerRegisterLink">アカウントを作る</li>
+            <li id="hamburgerLoginLink">ログイン</li>
+            <li id="hamburgerLogoutLink" class="logged-in">ログアウト</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="container">
+    <h1>my代用品</h1>
+    <p>自分専用の代用品を登録しておくと、登録した代用品がレシピ検索時に優先的に表示されます。</p>
+    <div class="filter-bar">
+      <input type="text" id="filterInputForIngredients" placeholder="材料を絞り込む">
+      <input type="text" id="filterInputForSubstitutes" placeholder="代用品を絞り込む">
+    </div>
+    <div id="loadingIndicator" style="display: none;">LOADING...</div>
+    <div id="noMySubstitutesMessage" style="display: none;">my代用品が登録されていません</div>
+    <div id="noFilteredSubstitutesMessage" style="display: none;">キーワードを含む my代用品 はありませんでした</div>
+    <button id="addNewSubstituteButton" class="submit-button">新規登録</button>
+    <div id="mySubstitutesList"></div>
+    <div class="pagination">
+      <button id="prevButton" disabled>Prev</button>
+      <span id="pageIndicator">Page 1/1</span>
+      <button id="nextButton" disabled>Next</button>
+    </div>
+  </div>
+  <!-- Add New Substitute Modal -->
+  <div id="substituteModal" class="modal">
+    <div class="modal-content">
+      <span id="closeSubstituteModal" class="close">&times;</span>
+      <h2 id="modalTitle">新しい代用品を追加</h2>
+      <form id="substituteForm">
+        <div class="ingredient-header">
+          <label for="ingredient">材料</label>
+          <input type="text" id="ingredient" name="ingredient" placeholder="例: 鶏肉" required>
+        </div>
+        <table class="substitute-table">
+          <thead>
+            <tr>
+              <th><label for="originalPortion">元の分量</label></th>
+              <th><label for="substituteName">代用品</label></th>
+              <th><label for="substitutePortion">代用品の分量</label></th>
+              <th class="veg"><label for="vegetarian">ベジ</label></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="text" id="originalPortion" name="originalPortion" placeholder="100g" required></td>
+              <td><input type="text" id="substituteName" name="substituteName" placeholder="大豆肉" required></td>
+              <td><input type="text" id="substitutePortion" name="substitutePortion" placeholder="100g" required></td>
+              <td><input type="checkbox" id="vegetarian" name="vegetarian"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="button-container">
+          <button type="submit" id="substituteFormSubmitButton" class="submit-button">追加</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Logout Modal -->
+  <div id="logoutModal" class="modal">
+    <div class="modal-content" id="logoutModalContent">
+      <span id="closeLogoutModal" class="close">&times;</span>
+      <!-- Logout modal content -->
+      <p>ログアウトしますか？</p>
+      <button id="confirmLogoutButton">ログアウト</button>
+      <button id="cancelLogoutButton">キャンセル</button>
+    </div>
+  </div>
+  <!-- Delete Substitute Modal -->
+  <div id="deleteSubstituteModal" class="modal">
+    <div class="modal-content">
+      <span id="closeDeleteSubstituteModal" class="close">&times;</span>
+      <p>本当に削除しますか？</p>
+      <button id="confirmDeleteSubstituteButton">削除</button>
+      <button id="cancelDeleteSubstituteButton">キャンセル</button>
+    </div>
+  </div>
+  <script src="scripts/mySubstitutes.js" type="module"></script>
+</body>
+</html>
