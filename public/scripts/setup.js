@@ -214,9 +214,6 @@ export function setupFormSubmissions() {
     const isPasswordValid = validatePassword(password, registerPasswordError);
 
     if (isEmailValid && isPasswordValid) {
-      // Log the email and password being sent
-      console.log('Registration request:', { email, password });
-
       // Submit the form if valid
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -262,9 +259,6 @@ export function setupFormSubmissions() {
     const isPasswordValid = validatePassword(password, loginPasswordError);
 
     if (isEmailValid && isPasswordValid) {
-      // Log the email and password being sent
-      console.log('Login request:', { email, password });
-
       // Submit the form if valid
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -351,14 +345,12 @@ export function setupFetchRecipe(url = null) {
       await removeFromFavorites(url);
       button.querySelector('#emptyHeart').style.display = 'block';
       button.querySelector('#filledHeart').style.display = 'none';
-      console.log('Toggle changed to unfavorite');
     } else {
       const recipeId = extractRecipeId(url);
       const title = document.getElementById('recipeName').textContent;
       await addToFavorites(recipeId, url, title);
       button.querySelector('#emptyHeart').style.display = 'none';
       button.querySelector('#filledHeart').style.display = 'block';
-      console.log('Toggle changed to favorite');
     }
   }
 
@@ -366,8 +358,6 @@ export function setupFetchRecipe(url = null) {
   async function checkIfFavorite(url, title) {
     try {
       const token = localStorage.getItem('token');
-      console.log("Check if favorite: " + url);
-      console.log("Check if favorite: " + title);
       const response = await fetch(`/api/favorites?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -377,7 +367,6 @@ export function setupFetchRecipe(url = null) {
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
-      console.log("Is favorite: " + data.isFavorite);
       return data.isFavorite;
     } catch (error) {
       console.error('Error checking if favorite:', error);
@@ -388,9 +377,7 @@ export function setupFetchRecipe(url = null) {
   // Function to add a recipe to the favorite list
   async function addToFavorites(recipeId, url, title) {
     const token = localStorage.getItem('token');
-    console.log('Recipe ID to add:', recipeId); // Log the recipe ID
-    console.log('URL to add:', url); // Log the URL
-    console.log('Title to add:', title); // Log the title
+    console.log('URL to add:' + url);
     const response = await fetch(`/api/favorites`, {
       method: 'POST',
       headers: {
@@ -421,22 +408,30 @@ export function setupFetchRecipe(url = null) {
 
   // Function to fetch and display the recipe
   async function fetchAndDisplayRecipe(url) {
+    const recipeContainer = document.querySelector('.recipe');
     const errorMessage = document.getElementById('errorMessage');
     const recipeNameBox = document.querySelector('.recipe-name-box');
     const checkAllButton = document.getElementById('checkAll');
     const searchSubstitutesButton = document.getElementById('searchSubstitutesButton');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+  
+  // Hide the recipe container and show the loading spinner initially
+    recipeContainer.style.display = 'none';
+    loadingSpinner.style.display = 'block';
 
     // Clear previous error message
     errorMessage.textContent = '';
 
     if (!url) {
       alert('URLを入力して「送信」を押して下さい');
+      loadingSpinner.style.display = 'none'; // Hide loading spinner
       return;
     }
 
     const cookpadUrlPattern = /^https:\/\/cookpad\.com\/jp\/recipes\/\d+/;
     if (!cookpadUrlPattern.test(url)) {
       alert('クックパッドのレシピURLを入力してください');
+      loadingSpinner.style.display = 'none'; // Hide loading spinner
       return;
     }
 
@@ -605,9 +600,15 @@ export function setupFetchRecipe(url = null) {
 
       // Add event listeners to new images
       addImageEventListeners();
+
+      // Show the recipe container and hide the loading spinner after fetching the recipe
+      recipeContainer.style.display = 'block';
+      loadingSpinner.style.display = 'none';
+
     } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
-      alert('レシピの取得に失敗しました。URLを確認してください。');
+      errorMessage.textContent = 'レシピの取得に失敗しました。URLを確認してください。';
+      errorMessage.style.display = 'block';
+      loadingSpinner.style.display = 'none';
     }
   }
 
@@ -644,7 +645,7 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
 
   // Function to extract and normalize ingredient names
   function extractText(input) {
-    const pattern = /[★●]?([^\(\)（）]+)(?:\（.*?\）|\(.*?\))?/;
+    const pattern = /[★●◆✴︎]?([^\(\)（）]+)(?:\（.*?\）|\(.*?\))?/;
     const match = input.match(pattern);
     return match ? match[1].trim() : input;
   }

@@ -44,13 +44,14 @@
   </header>
   <div class="container">
     <h1>お気に入りのレシピ</h1>
-    <p>タイトルは最後にアクセスされた時点のものが表示されています。<br>それ以降にタイトルが変更されている場合には、再度レシピ検索すると最新のタイトルに更新されます。</p>
+    <p>タイトルは最後に検索された時点のものが表示されます。<br>それ以降にタイトルが変更されている場合には、再度レシピ検索すると最新のタイトルに更新されます。</p>
     <div class="filter-bar">
-      <input type="text" id="filterInput" placeholder="レシピを絞り込む">
+      <input type="text" id="filterInput" placeholder="キーワードで絞り込む">
     </div>
     <div id="loadingIndicator" style="display: none;">LOADING...</div>
     <ul id="favoriteList"></ul>
     <div id="noFavoritesMessage" style="display: none;">お気に入りのレシピが登録されていません</div>
+    <div id="noFilteredRecipesMessage" style="display: none;">キーワードを含むレシピはありませんでした</div>
     <div class="pagination">
       <button id="prevButton" disabled>Prev</button>
       <span id="pageIndicator">Page 1/1</span>
@@ -161,29 +162,41 @@
       // Function to fetch favorite recipes
       async function fetchFavoriteRecipes(page = 1, searchQuery = '') {
         try {
-          console.log('Fetching favorite recipes'); // Log the function call
           const loadingIndicator = document.getElementById('loadingIndicator');
           loadingIndicator.style.display = 'block'; // Show loading indicator
 
           if (allRecipes.length === 0) {
             // Fetch all recipes only if not already fetched
             const data = await fetchWithAuth('/api/favorites/all');
-            console.log('Fetching favorite recipes for the first time'); // Log the function call
             allRecipes = data || [];
+            console.log('Favorite recipes:', allRecipes);
           }
 
           const favoriteList = document.getElementById('favoriteList');
           const noFavoritesMessage = document.getElementById('noFavoritesMessage');
+          const noFilteredRecipesMessage = document.getElementById('noFilteredRecipesMessage');
           const prevButton = document.getElementById('prevButton');
           const nextButton = document.getElementById('nextButton');
           const pageIndicator = document.getElementById('pageIndicator');
 
           if (allRecipes.length > 0) {
-            console.log('Favorite recipes:', allRecipes);
             favoriteList.innerHTML = '';
 
             // Filter recipes based on search query
             const filteredRecipes = allRecipes.filter(recipe => recipe.title.includes(searchQuery));
+
+            if (filteredRecipes.length === 0) {
+              // No recipes found after filtering
+              noFilteredRecipesMessage.style.display = 'block';
+              prevButton.style.display = 'none';
+              nextButton.style.display = 'none';
+              pageIndicator.style.display = 'none';
+              noFavoritesMessage.style.display = 'none';
+              loadingIndicator.style.display = 'none';
+              return;
+            } else {
+              noFilteredRecipesMessage.style.display = 'none';
+            }
 
             const startIndex = (page - 1) * recipesPerPage;
             const endIndex = startIndex + recipesPerPage;
@@ -209,8 +222,6 @@
             // Add event listeners to delete buttons
             document.querySelectorAll('.delete-button').forEach(button => {
               button.addEventListener('click', (event) => {
-                console.log('Delete button clicked. isAuthorized:', isAuthorized);
-                if (!isAuthorized) return; // Check authorization status before proceeding
                 recipeIdToDelete = event.target.getAttribute('data-recipe-id');
                 openConfirmDeleteModal();
               });
@@ -300,6 +311,7 @@
       // Handle confirm delete action
       document.getElementById('confirmDeleteButton').addEventListener('click', async () => {
         if (recipeIdToDelete) {
+          if (!checkToken()) return; // Check token validity before proceeding
           const listItem = document.querySelector(`button[data-recipe-id="${recipeIdToDelete}"]`).parentElement.parentElement;
           if (listItem) {
             const urlElement = listItem.querySelector('a');

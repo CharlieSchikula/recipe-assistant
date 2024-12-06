@@ -184,7 +184,7 @@ ul#favoriteList li button.delete-button:hover {
   background-color: #dddddd;
 }
 
-#noFavoritesMessage {
+#noFavoritesMessage, #noFilteredRecipesMessage {
   font-size: 1.2rem;
   color: darkslategray;
   text-align: center;
@@ -226,5 +226,6 @@ ul#favoriteList li button.delete-button:hover {
   margin-left: 5px;
   border: 1px solid #aaa;
   height: 30px;
-  width: 200px;
+  width: min(96%, 200px);
+  min-width: 100px;
 }

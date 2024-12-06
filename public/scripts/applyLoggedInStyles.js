@@ -85,7 +85,7 @@ export function renderHamburgerMenu(currentPage) {
 
   if (isLoggedIn()) {
     const email = getUserEmail();
-    console.log('UserEmail:', email);
+    console.log('User:', email);
     if (email) {
       hamburgerRegisterLink.style.display = 'none';
       hamburgerLoginLink.style.display = 'none';
