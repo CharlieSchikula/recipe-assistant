@@ -78,7 +78,6 @@ router.post('/login', [
 
 // Verify token middleware
 export const verifyToken = async (req, res, next) => {
-  console.log('Headers:', req.headers); // Log all headers
   const authHeader = req.headers.authorization;
   console.log('Authorization Header:', authHeader); // Log the Authorization header
 

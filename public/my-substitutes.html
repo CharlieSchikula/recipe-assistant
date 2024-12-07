@@ -92,7 +92,8 @@
           </tbody>
         </table>
         <div class="button-container">
-          <button type="submit" id="substituteFormSubmitButton" class="submit-button">追加</button>
+          <button type="submit" id="submitSubstituteFormButton" class="submit-button">追加</button>
+          <button type="button" id="cancelSubstituteFormButton" class="cancel-button">キャンセル</button>
         </div>
       </form>
     </div>
@@ -107,14 +108,25 @@
       <button id="cancelLogoutButton">キャンセル</button>
     </div>
   </div>
+  <!-- Delete Ingredient Modal -->
+  <div id="deleteIngredientModal" class="modal">
+    <div class="modal-content">
+      <p id="deleteIngredientMessage"></p>
+      <div class="button-container">
+        <button id="confirmDeleteIngredientButton">削除</button>
+        <button id="cancelDeleteIngredientButton">キャンセル</button>
+      </div>
+    </div>
+  </div>
   <!-- Delete Substitute Modal -->
   <div id="deleteSubstituteModal" class="modal">
     <div class="modal-content">
       <span id="closeDeleteSubstituteModal" class="close">&times;</span>
       <p>本当に削除しますか？</p>
-      <button id="confirmDeleteSubstituteButton">削除</button>
-      <button id="cancelDeleteSubstituteButton">キャンセル</button>
-    </div>
+      <div class="button-container">
+        <button id="confirmDeleteSubstituteButton">削除</button>
+        <button id="cancelDeleteSubstituteButton">キャンセル</button>
+      </div>
   </div>
   <script src="scripts/mySubstitutes.js" type="module"></script>
 </body>

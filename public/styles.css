@@ -32,7 +32,7 @@ h2 {
 /* Ensure images have a high enough z-index */
 img {
   cursor: pointer;
-  z-index: 10; /* Adjust the z-index as needed */
+  z-index: 10;
   position: relative; /* Ensure z-index takes effect */
 }
 
@@ -144,6 +144,7 @@ header {
   cursor: pointer;
   font-size: 1rem;
   font-weight: bold;
+  border: 2px solid #ccc;
   border-radius: 8px;
   z-index: 1000;
   margin: 10px;
@@ -171,7 +172,7 @@ header {
 #registerButton, .submit-button {
   background-color: darkcyan;
   color: white;
-  border: 2px solid darkslategray;
+  border: 2px solid #aaa;
 }
 
 #registerButton:hover, .submit-button:hover {
@@ -403,23 +404,26 @@ header {
   margin: 10px;
   background-color: darkcyan;
   color: white;
-  border: 2px solid darkslategray;
+  border: 2px solid #aaa;
 }
 
 #confirmLogoutButton:hover {
   background-color: #007b7f;
 }
 
-#cancelLogoutButton {
+#cancelLogoutButton, #cancelSelectButton {
   padding: 8px 16px;
   cursor: pointer;
   font-size: 1rem;
+  font-weight: bold;
   border-radius: 8px;
   margin: 10px;
-  border: 2px solid darkslategray;
+  color: gray;
+  border: 2px solid #ccc;
+  background-color: #eee;
 }
 
-#cancelLogoutButton:hover {
+#cancelLogoutButton:hover, #cancelSelectButton:hover {
   background-color: #dddddd;
 }
 
@@ -789,17 +793,33 @@ input:checked + .slider:before {
   font-weight: bold;
 }
 
-#selectSubstitute {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: darkcyan;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px; /* Space between buttons */
+  margin-top: 20px; /* Add some margin to the top */
 }
 
-#selectSubstitute:hover {
+#selectSubstituteButton, .submit-button, #cancelSelectButton {
+  flex: 1;
+  margin: 10px;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  border: 2px solid #aaa;
+  text-align: center;
+}
+
+#selectSubstituteButton {
+  width: 100px;
+  background-color: darkcyan;
+  color: white;
+}
+
+#selectSubstituteButton:hover {
   background-color: #007b7f;
 }
 
@@ -898,12 +918,11 @@ input:checked + .slider:before {
   }
 }
 
-
 /* images in steps */
 .image-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px; /* Adjust the gap between images as needed */
+  gap: 10px;
   position: relative; /* Ensure the pseudo-element is positioned relative to the container */
 }
 

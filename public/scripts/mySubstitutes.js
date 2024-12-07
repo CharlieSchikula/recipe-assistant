@@ -3,17 +3,20 @@ import { renderWideScreenMenu, renderHamburgerMenu } from './applyLoggedInStyles
 
 let token = localStorage.getItem('token');
 let allMySubstitutes = []; // Store all substitutes
-let substituteIdToDelete = null;
-let substituteIdToEdit = null;
 let searchQueryIngredients = ''; // Initialize searchQueryIngredients as an empty string
 let searchQuerySubstitutes = ''; // Initialize searchQuerySubstitutes as an empty string
 let currentPage = 1;
 const mySubstitutesPerPage = 5;
 let originalIngredient = ''; // Store the original ingredient value
-let activeIngredientInput = null;
+let activeIngredientInput = null; // Track the currently active input field
+let ingredientIdToDelete = null; // Track the ingredient to delete
+let substituteIdToDelete = null; // Track the substitute to delete
+let substituteIdToEdit = null; // Track the substitute to edit
 
-// Function to check token validity
-async function verifyToken() {
+
+// 1. Verify authorization
+async function isAuthorized() {
+  const token = localStorage.getItem('token');
   if (!token) {
     alert('トークンが存在しません。ログインし直してください');
     localStorage.setItem('showLoginModal', 'true');
@@ -43,14 +46,14 @@ async function verifyToken() {
   return true;
 }
 
-// Function to fetch my substitutes
+
+// 2. Fetch my substitutes
 async function fetchMySubstitutes() {
   try {
     console.log('Fetching my substitutes'); // Log the function call
     const loadingIndicator = document.getElementById('loadingIndicator');
     loadingIndicator.style.display = 'block'; // Show loading indicator
 
-    // Fetch all substitutes
     const response = await fetch('/api/my-substitutes', {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -69,18 +72,6 @@ async function fetchMySubstitutes() {
       loadingIndicator.style.display = 'none'; // Hide loading indicator
     }
   }
-}
-
-// Function to add event listeners to delete buttons
-function addDeleteButtonListeners() {
-  document.querySelectorAll('.delete-substitute-button').forEach(button => {
-    button.addEventListener('click', (event) => {
-      const substituteId = event.target.getAttribute('data-substitute-id');
-      console.log('Removing substitute:', substituteId); // Log the correct substitute ID
-      substituteIdToDelete = substituteId;
-      openDeleteSubstituteModal();
-    });
-  });
 }
 
 // Function to filter and display substitutes
@@ -131,12 +122,13 @@ function filterAndDisplaySubstitutes() {
         <div class="ingredient-header">
           材料:　<span class="underline">${ingredient}</span>
           <button class="edit-ingredient-button" data-ingredient-id="${_id}">編集</button>
+          <button class="delete-ingredient-button" data-ingredient-id="${_id}">削除</button>
         </div>
         <table class="substitute-table">
           <thead>
             <tr>
               <th>元の分量</th>
-              <th>代用品名</th>
+              <th>代用品</th>
               <th>代用品の分量</th>
               <th class="veg">ベジ</th>
               <th>操作</th>
@@ -161,6 +153,26 @@ function filterAndDisplaySubstitutes() {
       mySubstitutesList.appendChild(listItem);
     });
 
+    // Add event listeners to edit ingredient buttons
+    document.querySelectorAll('.edit-ingredient-button').forEach(button => {
+      button.addEventListener('click', (event) => {
+        const ingredientId = event.target.getAttribute('data-ingredient-id');
+        console.log('Editing Ingredient: ', ingredientId);
+        handleEditIngredient(ingredientId);
+      });
+    });
+
+    // Add event listeners to delete ingredient buttons
+    document.querySelectorAll('.delete-ingredient-button').forEach(button => {
+      button.addEventListener('click', (event) => {
+        const ingredientId = event.target.getAttribute('data-ingredient-id');
+        const ingredientName = event.target.closest('.ingredient-header').querySelector('.underline').textContent.trim();
+        openDeleteIngredientModal(ingredientId, ingredientName);
+        console.log('Deleting Ingredient:', ingredientId); // Log the correct ingredient ID
+        console.log('Ingredient Name:', ingredientName); // Log the correct ingredient name
+      });
+    });
+
     // Add event listeners to edit buttons
     document.querySelectorAll('.edit-substitute-button').forEach(button => {
       button.addEventListener('click', (event) => {
@@ -177,9 +189,6 @@ function filterAndDisplaySubstitutes() {
           }
         });
 
-        console.log('Found substitute:', foundSubstitute);
-        console.log('Found sub:', foundSub);
-
         if (foundSubstitute && foundSub) {
           handleEditSubstitute(foundSubstitute, foundSub);
         } else {
@@ -189,14 +198,11 @@ function filterAndDisplaySubstitutes() {
     });
 
     // Add event listeners to delete buttons
-    addDeleteButtonListeners();
-
-    // Add event listeners to edit ingredient buttons
-    document.querySelectorAll('.edit-ingredient-button').forEach(button => {
+    document.querySelectorAll('.delete-substitute-button').forEach(button => {
       button.addEventListener('click', (event) => {
-        const ingredientId = event.target.getAttribute('data-ingredient-id');
-        console.log('Editing ingredient:', ingredientId);
-        handleEditIngredient(ingredientId);
+        const substituteId = event.target.getAttribute('data-substitute-id');
+        console.log('Removing substitute:', substituteId); // Log the correct substitute ID
+        openDeleteSubstituteModal(substituteId);
       });
     });
 
@@ -228,19 +234,135 @@ function filterAndDisplaySubstitutes() {
   }
 }
 
-// Function to handle editing an ingredient
-function handleEditIngredient(ingredientId) {
+
+// 3. Add my substitute
+async function addNewSubstitute(substitute) {
+  const isTokenValid = await isAuthorized();
+  if (!isTokenValid) return;
+
+  console.log('Adding New Substitute: ', substitute);
+  const response = await fetch('/api/my-substitutes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(substitute)
+  });
+  const data = await response.json();
+  console.log("Response For Adding Substitute: ", data);
+  return data;
+}
+
+// Function to open the add substitute modal
+async function openAddSubstituteModal() {
+  const isTokenValid = await isAuthorized();
+  if (!isTokenValid) return;
+
+  document.getElementById('modalTitle').textContent = '新規登録';
+  document.getElementById('submitSubstituteFormButton').textContent = '登録';
+  clearSubstituteForm();
+  clearSubstituteIdToEdit(); // Clear substituteIdToEdit
+
+  // Add description to the ingredient header in the modal
+  const ingredientHeader = document.querySelector('.modal-ingredient-header');
+  ingredientHeader.innerHTML = `
+    <div class="substitute-modal-description">  
+      <span>
+        /（スラッシュ）で区切られた単語はすべて同一の材料として検索できます。<br>
+        例）<br>
+        ・調べたい材料：鶏肉（とり肉、鳥肉 の表記ゆれにも対応させたい場合）<br>
+        ・材料の書き方：鶏肉 / とり肉 / 鳥肉
+      </span>
+    </div>
+    <div class="modal-ingredient-input-area">
+      <label for="ingredient">材料</label>
+      <input type="text" id="ingredient" name="ingredient" placeholder="鶏肉 / とり肉" required>
+    </div>
+  `;
+
+  openSubstituteModal();
+}
+
+// Handle add new substitute action
+document.getElementById('addNewSubstituteButton').addEventListener('click', openAddSubstituteModal);
+
+document.getElementById('substituteForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const form = event.target;
+  const ingredient = form.querySelector('#ingredient').value.trim();
+  const originalPortion = form.querySelector('#originalPortion').value.trim();
+  const substituteName = form.querySelector('#substituteName').value.trim();
+  const substitutePortion = form.querySelector('#substitutePortion').value.trim();
+  const vegetarian = form.querySelector('#vegetarian').checked;
+  const newSubstitute = { ingredient, mySubstitutes: [{ originalPortion, substituteName, substitutePortion, vegetarian }] };
+
+  // Check for duplicate ingredient and substitute combination
+  const duplicate = allMySubstitutes.some(substitute => 
+    substitute.ingredient === ingredient && 
+    substitute.mySubstitutes.some(sub => sub.substituteName === substituteName && sub._id !== substituteIdToEdit)
+  );
+
+  if (duplicate) {
+    alert('その材料と代用品の組み合わせはすでに登録されています');
+    return;
+  }
+
+  if (substituteIdToEdit) {
+    if (ingredient !== originalIngredient) {
+      alert('材料は変更できません');
+      return;
+    }
+    await updateSubstitute(substituteIdToEdit, newSubstitute);
+    substituteIdToEdit = null;
+  } else {
+    await addNewSubstitute(newSubstitute);
+  }
+  closeSubstituteModal();
+  window.location.reload();
+});
+
+// Function to open the substitute modal
+async function openSubstituteModal() {
+  const isTokenValid = await isAuthorized();
+  if (!isTokenValid) return;
+  const substituteModal = document.getElementById('addOrEditSubstituteModal');
+  if (substituteModal) {
+    substituteModal.style.display = 'block';
+  }
+}
+
+// Function to close the substitute modal
+function closeSubstituteModal() {
+  const substituteModal = document.getElementById('addOrEditSubstituteModal');
+  if (substituteModal) {
+    substituteModal.style.display = 'none';
+  }
+  document.getElementById('ingredient').readOnly = false; // Make ingredient input editable
+}
+
+
+// 4. Edit ingredient of my substitutes
+async function handleEditIngredient(ingredientId) {
+  const isTokenValid = await isAuthorized();
+  if (!isTokenValid) return;
+
   // Close any currently active input field
   if (activeIngredientInput) {
     const { element, originalName, ingredientId: activeIngredientId } = activeIngredientInput;
     element.innerHTML = `
       材料:　<span class="underline">${originalName}</span>
       <button class="edit-ingredient-button" data-ingredient-id="${activeIngredientId}">編集</button>
+      <button class="delete-ingredient-button" data-ingredient-id="${activeIngredientId}">削除</button>
     `;
-    // Re-attach event listener for the edit button
+    // Re-attach event listeners for the edit and delete buttons
     document.querySelector(`.edit-ingredient-button[data-ingredient-id="${activeIngredientId}"]`).addEventListener('click', (event) => {
       const ingredientId = event.target.getAttribute('data-ingredient-id');
       handleEditIngredient(ingredientId);
+    });
+    document.querySelector(`.delete-ingredient-button[data-ingredient-id="${activeIngredientId}"]`).addEventListener('click', (event) => {
+      const ingredientId = event.target.getAttribute('data-ingredient-id');
+      openDeleteIngredientModal(ingredientId, originalName);
     });
     activeIngredientInput = null;
   }
@@ -271,6 +393,9 @@ function handleEditIngredient(ingredientId) {
   activeIngredientInput = { element: ingredientElement, originalName: originalIngredientName, ingredientId };
 
   saveButton.addEventListener('click', async () => {
+    const isTokenValid = await isAuthorized();
+    if (!isTokenValid) return;
+
     const newIngredientName = input.value.trim();
     if (newIngredientName === '') {
       alert('材料名を入力してください');
@@ -288,7 +413,7 @@ function handleEditIngredient(ingredientId) {
       return;
     }
 
-    console.log('Updating ingredient:', ingredientId, newIngredientName);
+    console.log('Updating Ingredient: ', ingredientId, newIngredientName);
 
     try {
       const response = await fetch(`/api/my-substitutes/ingredient/${ingredientId}`, {
@@ -304,104 +429,105 @@ function handleEditIngredient(ingredientId) {
         throw new Error('Failed to update ingredient');
       }
 
-      console.log('Ingredient updated:', newIngredientName);
+      console.log('Ingredient Updated: ', originalIngredientName, 'To', newIngredientName);
       fetchMySubstitutes(); // Refresh the list
     } catch (error) {
       console.error('Error updating ingredient:', error);
     }
-  });
+  })
 
-  cancelButton.addEventListener('click', () => {
+  cancelButton.addEventListener('click', async () => {
     fetchMySubstitutes(); // Refresh the list to reset the ingredient-header
-  });
+  }
+);
 }
 
-// Function to add event listeners to edit ingredient buttons
-function addEditIngredientButtonListeners() {
-  document.querySelectorAll('.edit-ingredient-button').forEach(button => {
-    button.addEventListener('click', (event) => {
-      const ingredientId = event.target.getAttribute('data-ingredient-id');
-      handleEditIngredient(ingredientId);
+
+// 5. Delete ingredient of my substitutes
+// Function to handle deleting an ingredient
+async function handleDeleteIngredient(ingredientId) {
+  const isTokenValid = await isAuthorized();
+  if (!isTokenValid) return;
+
+  console.log('Deleting Ingredient: ', ingredientId);
+
+  try {
+    const response = await fetch(`/api/my-substitutes/ingredient/${ingredientId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete ingredient');
+    }
+
+    console.log('Ingredient Deleted: ', ingredientId);
+    fetchMySubstitutes(); // Refresh the list
+  } catch (error) {
+    console.error('Error deleting ingredient:', error);
+  }
+}
+
+// Function to open the delete ingredient modal
+async function openDeleteIngredientModal(ingredientId, ingredientName) {
+  const isTokenValid = await isAuthorized();
+  if (!isTokenValid) return;
+  ingredientIdToDelete = ingredientId;
+  const deleteIngredientModal = document.getElementById('deleteIngredientModal');
+  const deleteIngredientMessage = document.getElementById('deleteIngredientMessage');
+  deleteIngredientMessage.innerHTML = `この材料に登録された全ての代用品が削除されます。<br>よろしいですか？<br><strong>材料：${ingredientName}</strong>`;
+  if (deleteIngredientModal) {
+    deleteIngredientModal.style.display = 'block';
+  }
+}
+
+// Function to close the delete ingredient modal
+function closeDeleteIngredientModal() {
+  const deleteIngredientModal = document.getElementById('deleteIngredientModal');
+  if (deleteIngredientModal) {
+    deleteIngredientModal.style.display = 'none';
+  }
+}
+
+// Handle confirm delete action for ingredient
+const confirmDeleteIngredientButton = document.getElementById('confirmDeleteIngredientButton');
+if (confirmDeleteIngredientButton) {
+  confirmDeleteIngredientButton.addEventListener('click', async () => {
+    if (ingredientIdToDelete) {
+      await handleDeleteIngredient(ingredientIdToDelete);
+      ingredientIdToDelete = null;
+      closeDeleteIngredientModal();
+      fetchMySubstitutes(); // Refresh the list
+    }
   });
 }
 
-// Call this function after dynamically generating the buttons
-addEditIngredientButtonListeners();
-
-// Function to add a new substitute
-async function addNewSubstitute(substitute) {
-  const isTokenValid = await verifyToken();
-  if (!isTokenValid) return;
-  console.log('Adding new substitute:', substitute);
-  const response = await fetch('/api/my-substitutes', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(substitute)
+// Handle cancel delete action for ingredient
+const cancelDeleteIngredientButton = document.getElementById('cancelDeleteIngredientButton');
+if (cancelDeleteIngredientButton) {
+  cancelDeleteIngredientButton.addEventListener('click', () => {
+    ingredientIdToDelete = null;
+    closeDeleteIngredientModal();
   });
-  const data = await response.json();
-  console.log("Completed adding:", data);
-  return data;
 }
 
-// Function to update a substitute
-async function updateSubstitute(id, substitute) {
-  const isTokenValid = await verifyToken();
-  if (!isTokenValid) return;
-  console.log('Updating substitute:', id, substitute);
-  const response = await fetch(`/api/my-substitutes/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(substitute)
-  });
-  const data = await response.json();
-  console.log("Completed updating:", data);
-  return data;
-}
+// Close the delete ingredient modal when clicking outside of it
+window.addEventListener('click', (event) => {
+  const deleteIngredientModal = document.getElementById('deleteIngredientModal');
+  if (event.target === deleteIngredientModal) {
+    closeDeleteIngredientModal();
+  }
+});
 
-// Function to open the add substitute modal
-async function openAddSubstituteModal() {
-  const isTokenValid = await verifyToken();
-  if (!isTokenValid) return;
-
-  document.getElementById('modalTitle').textContent = '新規登録';
-  document.getElementById('substituteFormSubmitButton').textContent = '登録';
-  clearSubstituteForm();
-  clearSubstituteIdToEdit(); // Clear substituteIdToEdit
-
-  // Add description to the ingredient header in the modal
-  const ingredientHeader = document.querySelector('.modal-ingredient-header');
-  ingredientHeader.innerHTML = `
-    <div class="substitute-modal-description">  
-      <span>
-        /（スラッシュ）で区切られた単語はすべて同一の材料として検索できます。<br>
-        例）<br>
-        ・調べたい材料：鶏肉（とり肉、鳥肉 の表記ゆれにも対応させたい場合）<br>
-        ・材料の書き方：鶏肉 / とり肉 / 鳥肉
-      </span>
-    </div>
-    <div class="modal-ingredient-input-area">
-      <label for="ingredient">材料</label>
-      <input type="text" id="ingredient" name="ingredient" placeholder="鶏肉 / とり肉" required>
-    </div>
-  `;
-
-  openSubstituteModal();
-}
-
-// Function to open the edit substitute modal
+// 6. Edit substitutes of my substitutes
 async function handleEditSubstitute(substitute, sub) {
-  const isTokenValid = await verifyToken();
+  const isTokenValid = await isAuthorized();
   if (!isTokenValid) return;
 
   document.getElementById('modalTitle').textContent = 'my代用品 を編集';
-  document.getElementById('substituteFormSubmitButton').textContent = '更新';
+  document.getElementById('submitSubstituteFormButton').textContent = '更新';
   document.getElementById('ingredient').value = substitute.ingredient;
   originalIngredient = substitute.ingredient; // Store the original ingredient value
   document.getElementById('originalPortion').value = sub.originalPortion;
@@ -409,7 +535,6 @@ async function handleEditSubstitute(substitute, sub) {
   document.getElementById('substitutePortion').value = sub.substitutePortion;
   document.getElementById('vegetarian').checked = sub.vegetarian;
   substituteIdToEdit = sub._id;
-  console.log("substituteIdToEdit: " + substituteIdToEdit);
   
   // Add description to the ingredient header in the modal
   const ingredientHeader = document.querySelector('.modal-ingredient-header');
@@ -424,22 +549,66 @@ async function handleEditSubstitute(substitute, sub) {
   openSubstituteModal();
 }
 
-// Function to open the substitute modal
-function openSubstituteModal() {
-  const substituteModal = document.getElementById('addOrEditSubstituteModal');
-  if (substituteModal) {
-    substituteModal.style.display = 'block';
+// Function to update a substitute
+async function updateSubstitute(id, substitute) {
+  const isTokenValid = await isAuthorized();
+  if (!isTokenValid) return;
+  console.log('Updating Substitute: ', id, substitute);
+  const response = await fetch(`/api/my-substitutes/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(substitute)
+  });
+  const data = await response.json();
+  console.log("Response For Updating Substitute: ", data);
+  return data;
+}
+
+
+// 7. Delete substitute of my substitutes
+// Function to remove a substitute
+async function handleDeleteSubstitute(substituteId) {
+  const isTokenValid = await isAuthorized();
+  if (!isTokenValid) return;
+
+  try {
+    const response = await fetch(`/api/my-substitutes/${substituteId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete substitute');
+    }
+
+    console.log('Substitute Deleted: ', substituteId);
+  } catch (error) {
+    console.error('Error deleting substitute:', error);
   }
 }
 
-// Function to close the substitute modal
-function closeSubstituteModal() {
-  const substituteModal = document.getElementById('addOrEditSubstituteModal');
-  if (substituteModal) {
-    substituteModal.style.display = 'none';
-  }
-  document.getElementById('ingredient').readOnly = false; // Make ingredient input editable
+// Handle confirm delete action for substitute
+const confirmDeleteSubstituteButton = document.getElementById('confirmDeleteSubstituteButton');
+if (confirmDeleteSubstituteButton) {
+  confirmDeleteSubstituteButton.addEventListener('click', async () => {
+    if (substituteIdToDelete) {
+      await handleDeleteSubstitute(substituteIdToDelete);
+      substituteIdToDelete = null;
+      closeDeleteSubstituteModal();
+      fetchMySubstitutes(); // Refresh the list
+    }
+  });
 }
+
+
+// Others: Add event listeners
+// Add event listener to close the add or edit substitute modal
+document.getElementById('cancelSubstituteFormButton').addEventListener('click', closeSubstituteModal);
 
 // Function to clear the substitute form
 function clearSubstituteForm() {
@@ -455,21 +624,11 @@ function clearSubstituteIdToEdit() {
   substituteIdToEdit = null;
 }
 
-// Add event listeners to delete buttons
-document.querySelectorAll('.delete-substitute-button').forEach(button => {
-  button.addEventListener('click', (event) => {
-    const substituteId = event.target.getAttribute('data-substitute-id');
-    console.log('Removing substitute:', substituteId); // Log the correct substitute ID
-    substituteIdToDelete = substituteId;
-    openDeleteSubstituteModal();
-  });
-});
-
 // Function to open the delete substitute modal
-async function openDeleteSubstituteModal() {
-  const isTokenValid = await verifyToken();
+async function openDeleteSubstituteModal(substituteId) {
+  const isTokenValid = await isAuthorized();
   if (!isTokenValid) return;
-
+  substituteIdToDelete = substituteId;
   const deleteSubstituteModal = document.getElementById('deleteSubstituteModal');
   if (deleteSubstituteModal) {
     deleteSubstituteModal.style.display = 'block';
@@ -495,73 +654,49 @@ function debounce(func, wait) {
 
 // Verify token on page load
 document.addEventListener('DOMContentLoaded', async () => {
-  const isTokenValid = await verifyToken();
+  const isTokenValid = await isAuthorized();
   if (isTokenValid) {
     fetchMySubstitutes(); // Fetch and display my substitutes on page load
-  }
-});
 
-// Add event listeners to close buttons for modals
-document.getElementById('closeSubstituteModal').addEventListener('click', closeSubstituteModal);
-document.getElementById('closeDeleteSubstituteModal').addEventListener('click', closeDeleteSubstituteModal);
+    // Handle cancel delete action for substitute
+    const cancelDeleteSubstituteButton = document.getElementById('cancelDeleteSubstituteButton');
+    if (cancelDeleteSubstituteButton) {
+      cancelDeleteSubstituteButton.addEventListener('click', () => {
+        substituteIdToDelete = null;
+        closeDeleteSubstituteModal();
+      });
+    }
 
-// Add event listener to close delete modal when clicking outside of it
-window.addEventListener('click', (event) => {
-  const deleteSubstituteModal = document.getElementById('deleteSubstituteModal');
-  if (event.target === deleteSubstituteModal) {
-    closeDeleteSubstituteModal();
-  }
-});
+    // Add event listeners to close buttons for modals
+    document.getElementById('closeSubstituteModal').addEventListener('click', closeSubstituteModal);
+    document.getElementById('closeDeleteSubstituteModal').addEventListener('click', closeDeleteSubstituteModal);
 
-// Handle confirm delete action
-document.getElementById('confirmDeleteSubstituteButton').addEventListener('click', async () => {
-  if (substituteIdToDelete) {
-    await removeSubstitute(substituteIdToDelete);
-    substituteIdToDelete = null;
-    closeDeleteSubstituteModal();
-    fetchMySubstitutes(); // Refresh the list
-  }
-});
-
-// Function to remove a substitute
-async function removeSubstitute(id) {
-  const isTokenValid = await verifyToken();
-  if (!isTokenValid) return;
-
-  try {
-    const response = await fetch(`/api/my-substitutes/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
+    // Add event listener to close delete modal when clicking outside of it
+    window.addEventListener('click', (event) => {
+      const deleteSubstituteModal = document.getElementById('deleteSubstituteModal');
+      if (event.target === deleteSubstituteModal) {
+        closeDeleteSubstituteModal();
       }
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to delete substitute');
-    }
+    // Add event listener for search input with debounce
+    document.getElementById('filterInputForIngredients').addEventListener('input', debounce(() => {
+      searchQueryIngredients = document.getElementById('filterInputForIngredients').value.trim();
+      currentPage = 1; // Reset to the first page
+      filterAndDisplaySubstitutes();
+    }, 300));
 
-    console.log('Substitute removed:', id); // Log the removed substitute ID
-  } catch (error) {
-    console.error('Error removing substitute:', error);
+    document.getElementById('filterInputForSubstitutes').addEventListener('input', debounce(() => {
+      searchQuerySubstitutes = document.getElementById('filterInputForSubstitutes').value.trim();
+      currentPage = 1; // Reset to the first page
+      filterAndDisplaySubstitutes();
+    }, 300));
   }
-}
-
-// Add event listener for search input with debounce
-document.getElementById('filterInputForIngredients').addEventListener('input', debounce(() => {
-  searchQueryIngredients = document.getElementById('filterInputForIngredients').value.trim();
-  currentPage = 1; // Reset to the first page
-  filterAndDisplaySubstitutes();
-}, 300));
-
-document.getElementById('filterInputForSubstitutes').addEventListener('input', debounce(() => {
-  searchQuerySubstitutes = document.getElementById('filterInputForSubstitutes').value.trim();
-  currentPage = 1; // Reset to the first page
-  filterAndDisplaySubstitutes();
-}, 300));
+});
 
 // Check token and setup menus
 async function initializePage() {
-  const isTokenValid = await verifyToken();
+  const isTokenValid = await isAuthorized();
   if (isTokenValid) {
     setupHamburgerMenu();
     setupModals();
@@ -571,49 +706,3 @@ async function initializePage() {
 }
 
 initializePage();
-
-// Handle add new substitute action
-document.getElementById('addNewSubstituteButton').addEventListener('click', openAddSubstituteModal);
-
-document.getElementById('substituteForm').addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const form = event.target;
-  const ingredient = form.querySelector('#ingredient').value.trim();
-  const originalPortion = form.querySelector('#originalPortion').value.trim();
-  const substituteName = form.querySelector('#substituteName').value.trim();
-  const substitutePortion = form.querySelector('#substitutePortion').value.trim();
-  const vegetarian = form.querySelector('#vegetarian').checked;
-  const newSubstitute = { ingredient, mySubstitutes: [{ originalPortion, substituteName, substitutePortion, vegetarian }] };
-
-  console.log('New substitute:', newSubstitute);
-
-  // Check for duplicate ingredient and substitute combination
-  const duplicate = allMySubstitutes.some(substitute => 
-    substitute.ingredient === ingredient && 
-    substitute.mySubstitutes.some(sub => sub.substituteName === substituteName && sub._id !== substituteIdToEdit)
-  );
-
-  if (duplicate) {
-    alert('その材料と代用品の組み合わせはすでに登録されています');
-    return;
-  }
-
-  if (substituteIdToEdit) {
-    if (ingredient !== originalIngredient) {
-      alert('材料は変更できません');
-      return;
-    }
-    await updateSubstitute(substituteIdToEdit, newSubstitute);
-    substituteIdToEdit = null;
-  } else {
-    await addNewSubstitute(newSubstitute);
-  }
-  closeSubstituteModal();
-  fetchMySubstitutes(); // Refresh the list
-});
-
-// Handle cancel delete action
-document.getElementById('cancelDeleteSubstituteButton').addEventListener('click', () => {
-  substituteIdToDelete = null;
-  closeDeleteSubstituteModal();
-});

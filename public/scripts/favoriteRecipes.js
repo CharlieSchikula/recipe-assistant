@@ -8,7 +8,7 @@ let searchQuery = ''; // Initialize searchQuery as an empty string
 let allRecipes = []; // Store all recipes
 
 // Function to check token validity
-function checkToken() {
+function isAuthorized() {
   const token = localStorage.getItem('token');
   if (!token) {
     alert('トークンが存在しません。ログインし直してください');
@@ -39,7 +39,8 @@ function checkToken() {
   return true;
 }
 
-if (checkToken()) {
+
+if (isAuthorized()) {
   setupHamburgerMenu();
   setupModals();
   renderWideScreenMenu('favorite-recipes');
@@ -83,9 +84,10 @@ if (checkToken()) {
 
       if (allRecipes.length === 0) {
         // Fetch all recipes only if not already fetched
+        console.log('Fetching Favorite Recipes'); // Log the function call
         const data = await fetchWithAuth('/api/favorites/all');
         allRecipes = data || [];
-        console.log('Favorite recipes:', allRecipes);
+        console.log('Favorite Recipes: ', allRecipes);
       }
 
       const favoriteList = document.getElementById('favoriteList');
@@ -185,7 +187,7 @@ if (checkToken()) {
   // Function to remove a recipe from the favorite list
   async function removeFromFavorites(url) {
     const token = localStorage.getItem('token');
-    console.log('Removing recipe from favorites:', url);
+    console.log('Removing Recipe From Favorites: ', url);
     const response = await fetch(`/api/favorites?url=${encodeURIComponent(url)}`, {
       method: 'DELETE',
       headers: {
@@ -193,7 +195,7 @@ if (checkToken()) {
       }
     });
     const data = await response.json();
-    console.log("Completed deleting:", data);
+    console.log("Response For Deleting Favorite: ", data);
     return data;
   }
 
@@ -227,7 +229,7 @@ if (checkToken()) {
   // Handle confirm delete action
   document.getElementById('confirmDeleteButton').addEventListener('click', async () => {
     if (recipeIdToDelete) {
-      if (!checkToken()) return; // Check token validity before proceeding
+      if (!isAuthorized()) return; // Check token validity before proceeding
       const listItem = document.querySelector(`button[data-recipe-id="${recipeIdToDelete}"]`).parentElement.parentElement;
       if (listItem) {
         const urlElement = listItem.querySelector('a');

@@ -3,6 +3,19 @@ import { displaySubstitutes } from './substitutes.js';
 import { validateEmail, validatePassword } from './validateEmailAndPassword.js';
 import { applyStylesToStepImg } from './applyStylesToStepImg.js';
 
+// Function to check token validity
+function isAuthorized() {
+  const token = localStorage.getItem('token');
+  if(token) { 
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const exp = payload.exp * 1000;
+    if (Date.now() >= exp) {
+      alert('トークンの有効期限が切れました。ログインし直してください');
+      localStorage.removeItem('token');
+    }
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   setupModals();
 });
@@ -303,7 +316,7 @@ export function setupFetchRecipe(url = null) {
   }
 
   // Function to check if the user is logged in
-  function isLoggedIn() {
+  function verifiToken() {
     const token = localStorage.getItem('token');
     if (!token) return false;
 
@@ -340,17 +353,24 @@ export function setupFetchRecipe(url = null) {
 
   // Function to toggle favorite status
   async function toggleFavorite(url, title, button) {
-    const isFavorite = await checkIfFavorite(url, title);
-    if (isFavorite) {
-      await removeFromFavorites(url);
-      button.querySelector('#emptyHeart').style.display = 'block';
+    isAuthorized();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      button.querySelector('#emptyHeart').style.display = 'none';
       button.querySelector('#filledHeart').style.display = 'none';
     } else {
-      const recipeId = extractRecipeId(url);
-      const title = document.getElementById('recipeName').textContent;
-      await addToFavorites(recipeId, url, title);
-      button.querySelector('#emptyHeart').style.display = 'none';
-      button.querySelector('#filledHeart').style.display = 'block';
+        const isFavorite = await checkIfFavorite(url, title);
+        if (isFavorite) {
+        await removeFromFavorites(url);
+        button.querySelector('#emptyHeart').style.display = 'block';
+        button.querySelector('#filledHeart').style.display = 'none';
+        } else {
+          const recipeId = extractRecipeId(url);
+          const title = document.getElementById('recipeName').textContent;
+          await addToFavorites(recipeId, url, title);
+          button.querySelector('#emptyHeart').style.display = 'none';
+          button.querySelector('#filledHeart').style.display = 'block';
+        }
     }
   }
 
@@ -358,6 +378,7 @@ export function setupFetchRecipe(url = null) {
   async function checkIfFavorite(url, title) {
     try {
       const token = localStorage.getItem('token');
+      if (!token) return false;
       const response = await fetch(`/api/favorites?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -377,7 +398,7 @@ export function setupFetchRecipe(url = null) {
   // Function to add a recipe to the favorite list
   async function addToFavorites(recipeId, url, title) {
     const token = localStorage.getItem('token');
-    console.log('URL to add:' + url);
+    console.log('URL To Add: ' + url);
     const response = await fetch(`/api/favorites`, {
       method: 'POST',
       headers: {
@@ -387,14 +408,14 @@ export function setupFetchRecipe(url = null) {
       body: JSON.stringify({ recipeId, url, title })
     });
     const data = await response.json();
-    console.log('Added to favorites response:', data); // Log the response
+    console.log('Response For Adding Favorite: ', data); // Log the response
     return data;
   }
 
   // Function to remove a recipe from the favorite list
   async function removeFromFavorites(url) {
     const token = localStorage.getItem('token');
-    console.log( "URL to remove: " + url);
+    console.log( "URL To Remove: " + url);
     const response = await fetch(`/api/favorites?url=${url}`, {
       method: 'DELETE',
       headers: {
@@ -402,7 +423,7 @@ export function setupFetchRecipe(url = null) {
       }
     });
     const data = await response.json();
-    console.log('Removed from favorites response:', data); // Log the response
+    console.log('Response For Removing Favorite: ', data); // Log the response
     return data;
   }
 
@@ -438,10 +459,10 @@ export function setupFetchRecipe(url = null) {
     const recipeId = extractRecipeId(url);
     const cleanedUrl = "https://cookpad.com/jp/recipes/" + recipeId;
 
-    console.log(`Fetching recipe from URL: ${cleanedUrl}`);
+    console.log(`Fetching Recipe From URL: ${cleanedUrl}`);
     try {
       const data = await fetchRecipe(cleanedUrl);
-      console.log('Recipe data received:', data);
+      console.log('Recipe Data Received: ', data);
       const ingredientList = document.getElementById('ingredientList');
       const stepList = document.getElementById('stepList');
       const servingsInfo = document.getElementById('servingsInfo');
@@ -461,7 +482,7 @@ export function setupFetchRecipe(url = null) {
         recipeNameText.innerHTML = `<a href="${cleanedUrl}" target="_blank" style="color: inherit; text-decoration: none;">${data.title}</a>`;
         recipeNameBox.appendChild(recipeNameText);
 
-        if (isLoggedIn()) {
+        if (verifiToken()) {
           const favoriteButton = document.createElement('button');
           favoriteButton.classList.add('favorite-button');
           favoriteButton.innerHTML = `
@@ -528,12 +549,10 @@ export function setupFetchRecipe(url = null) {
 
             // Add event listener for unchecking checkboxes
             checkbox.addEventListener('change', (event) => {
-              console.log('Checkbox changed:', event.target.checked);
               const ingredientElement = event.target.closest('.ingredient-container').parentElement;
               const containersToRemove = ingredientElement.querySelectorAll('.substitute-container, .no-substitutes-message, .multiple-substitutes-list');
               if (!event.target.checked) {
                 containersToRemove.forEach(container => container.remove());
-                console.log('Removed containers:', containersToRemove);
               }
             });
           } else {
@@ -652,6 +671,7 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
 
   // Add event listener for search Substitutes button
   document.getElementById('searchSubstitutesButton').addEventListener('click', () => {
+    
     const checkedIngredients = Array.from(document.querySelectorAll('.ingredient-checkbox:checked'))
       .map(checkbox => checkbox.nextElementSibling.textContent.trim());
 
@@ -659,6 +679,8 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
       alert('１つ以上の材料を選択してください。');
       return;
     }
+
+    isAuthorized(); // Verify token before proceeding
 
     const vegetarianMode = document.getElementById('vegetarianMode').checked;
 
@@ -670,7 +692,7 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
       const token = localStorage.getItem('token'); // Get the token from local storage if it exists
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-      console.log("cleanedIngredient:" + cleanedIngredient);
+      console.log("Cleaned Ingredient: " + cleanedIngredient);
 
       fetch(`/api/substitutes?ingredient=${encodeURIComponent(cleanedIngredient)}`, { headers })
         .then(response => {
@@ -687,7 +709,6 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
         })
         .catch(error => {
           console.error('Error fetching substitutes:', error);
-          alert('Error fetching substitutes: ' + error.message);
         });
     });
   });
@@ -701,7 +722,6 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
       const containersToRemove = ingredientElement.querySelectorAll('.substitute-container, .no-substitutes-message, .multiple-substitutes-list');
       if (!event.target.checked) {
         containersToRemove.forEach(container => container.remove());
-        console.log('Removed containers:', containersToRemove);
       }
     });
   });

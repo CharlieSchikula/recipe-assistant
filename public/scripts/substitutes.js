@@ -23,7 +23,7 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
 
   if (!filteredSubstitutes || filteredSubstitutes.length === 0) {
     const noSubstitutesMessage = document.createElement('div');
-    noSubstitutesMessage.textContent = `${cleanedIngredient}の代用品が見つかりませんでした。`;
+    noSubstitutesMessage.textContent = `${cleanedIngredient}の用品が見つかりませんでした。`;
     console.log('No substitutes found for:', cleanedIngredient);
     noSubstitutesMessage.classList.add('no-substitutes-message');
     liElement.appendChild(noSubstitutesMessage); // Append message after ingredient-container
@@ -63,36 +63,27 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
 }
 
 // Function to open the modal to select a substitute when multiple substitutes are found
-function openSubstitutesModal(substitutes, cleanedIngredient, substituteContainer) {
+function openSubstitutesModal(filteredSubstitutes, cleanedIngredient, substituteContainer) {
   const substitutesModal = document.getElementById('substitutesModal');
   const substitutesList = document.getElementById('substitutesList');
-  if (!substitutesModal || !substitutesList) {
-    console.error('Substitutes modal or list element not found');
-    return;
-  }
   substitutesList.innerHTML = '';
 
-  // Ensure substitutes is an array
-  if (!Array.isArray(substitutes)) {
-    console.error('Substitutes is not an array');
-    return;
-  }
-
   // Add substitutes to the list as radio buttons
-  substitutes.forEach((substitute, index) => {
+  filteredSubstitutes.forEach(substitute => {
     const listItem = document.createElement('li');
     const radioInput = document.createElement('input');
     radioInput.type = 'radio';
     radioInput.name = 'substitute';
     radioInput.value = substitute.substituteName;
-    radioInput.id = `substitute-${index}`;
+    radioInput.id = `substitute-${substitute.substituteName}`;
+
     const label = document.createElement('label');
-    label.htmlFor = `substitute-${index}`;
-    const ingredientNameStyled = `<span class="ingredient-name-styled">${cleanedIngredient}</span>`;
+    label.htmlFor = radioInput.id;
     label.innerHTML = `
       ${substitute.isUserSubstitute ? '<span class="star">★</span>' : ''}
-      ${ingredientNameStyled} の分量 <span class="portion">${substitute.originalPortion}</span> に対して <span class="substitute-name">${substitute.substituteName}</span> の分量 <span class="portion">${substitute.substitutePortion}</span>
+      <span class="ingredient-name-styled">${cleanedIngredient}</span> の分量 <span class="portion">${substitute.originalPortion}</span> に対して <span class="substitute-name">${substitute.substituteName}</span> の分量 <span class="portion">${substitute.substitutePortion}</span>
     `;
+
     if (substitute.vegetarian) {
       const vegBox = document.createElement('span');
       vegBox.textContent = 'べジ';
@@ -123,16 +114,33 @@ function openSubstitutesModal(substitutes, cleanedIngredient, substituteContaine
   };
 
   // Handle the selection of a substitute
-  const selectSubstituteButton = document.getElementById('selectSubstitute');
+  const selectSubstituteButton = document.getElementById('selectSubstituteButton');
   if (selectSubstituteButton) {
-    selectSubstituteButton.onclick = () => {
+    selectSubstituteButton.onclick = (event) => {
+      event.preventDefault(); // Prevent the default action
       const selectedSubstitute = document.querySelector('input[name="substitute"]:checked');
       if (selectedSubstitute) {
+        console.log('Selected substitute:', selectedSubstitute.value);
         const selectedLabel = selectedSubstitute.nextElementSibling;
         substituteContainer.innerHTML = `${selectedLabel.innerHTML}`;
         substituteContainer.classList.add('substitute-container'); // Apply the class for styling
         substitutesModal.style.display = 'none'; // Close the modal after selection
+
+        // Append the substituteContainer to the correct parent element
+        const liElement = document.querySelector(`li[data-ingredient="${cleanedIngredient}"]`);
+        if (liElement) {
+          liElement.appendChild(substituteContainer);
+        }
       }
+    };
+  }
+
+  // Handle cancel action for the modal
+  const cancelSelectButton = document.getElementById('cancelSelectButton');
+  if (cancelSelectButton) {
+    cancelSelectButton.onclick = (event) => {
+      event.preventDefault(); // Prevent the default action
+      substitutesModal.style.display = 'none';
     };
   }
 }
