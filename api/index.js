@@ -303,6 +303,37 @@ router.post('/api/my-substitutes', verifyToken, async (req, res) => {
   }
 });
 
+// Update ingredient name in the my-substitutes list
+router.put('/api/my-substitutes/ingredient/:id', verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const { newIngredientName } = req.body;
+  const email = req.user.email;
+
+  console.log('Updating ingredient for user:', email); // Log the user email
+  console.log('Ingredient ID:', id); // Log the ingredient ID
+  console.log('New Ingredient Name:', newIngredientName); // Log the new ingredient name
+
+  try {
+    const substitute = await MySubstitute.findOne({ email, _id: id });
+    if (!substitute) {
+      return res.status(404).json({ success: false, message: 'Substitute not found' });
+    }
+
+    // Check for duplicate ingredient name
+    const duplicate = await MySubstitute.findOne({ email, ingredient: newIngredientName });
+    if (duplicate) {
+      return res.status(400).json({ success: false, message: 'その材料名はすでに登録されています' });
+    }
+
+    substitute.ingredient = newIngredientName;
+    await substitute.save();
+    res.json({ success: true, substitute });
+  } catch (error) {
+    console.error('Error updating ingredient:', error); // Log the error
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Update a substitute in the my-substitutes list
 router.put('/api/my-substitutes/:id', verifyToken, async (req, res) => {
   const { id } = req.params;

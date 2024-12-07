@@ -275,7 +275,7 @@ p {
   gap: 10px;
 }
 
-.edit-substitute-button, .delete-substitute-button {
+.edit-substitute-button, .delete-substitute-button, .edit-ingredient-button, .save-ingredient-button, .cancel-ingredient-button {
   padding: 5px 5px;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -285,21 +285,37 @@ p {
   font-weight: bold; /* Ensure the font is bold */
 }
 
-.edit-substitute-button {
+.edit-ingredient-button {
+  margin-left: 10px;
+  font-size: 1rem;
+}
+
+.save-ingredient-button, .cancel-ingredient-button {
+  margin-left: 5px;
+  font-size: 1rem;
+}
+
+.edit-ingredient-input {
+  font-weight: 500;
+  max-width: 100%;
+  min-width: 100px;
+}
+
+.edit-substitute-button, .edit-ingredient-button, .save-ingredient-button {
   background-color: darkcyan;
   color: #fff;
 }
 
-.edit-substitute-button:hover {
+.edit-substitute-button:hover, .edit-ingredient-button:hover, .save-ingredient-button:hover {
   background-color: #007b7f;
 }
 
-.delete-substitute-button {
+.delete-substitute-button, .cancel-ingredient-button {
   background-color: #ff4d4d;
   color: #fff;
 }
 
-.delete-substitute-button:hover {
+.delete-substitute-button:hover, .cancel-ingredient-button:hover {
   background-color: #ff1a1a;
 }
 
@@ -398,7 +414,7 @@ input:-webkit-autofill:active {
     gap: 5px;
   }
 
-  .edit-substitute-button, .delete-substitute-button {
+  .edit-substitute-button, .delete-substitute-button, .edit-ingredient-button, .save-ingredient-button, .cancel-ingredient-button {
     min-height: 32px;
     min-width: 48px; /* Full width for the button */
     padding: 2px;

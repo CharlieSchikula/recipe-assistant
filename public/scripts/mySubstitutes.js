@@ -10,6 +10,7 @@ let searchQuerySubstitutes = ''; // Initialize searchQuerySubstitutes as an empt
 let currentPage = 1;
 const mySubstitutesPerPage = 5;
 let originalIngredient = ''; // Store the original ingredient value
+let activeIngredientInput = null;
 
 // Function to check token validity
 async function verifyToken() {
@@ -129,6 +130,7 @@ function filterAndDisplaySubstitutes() {
       listItem.innerHTML = `
         <div class="ingredient-header">
           材料:　<span class="underline">${ingredient}</span>
+          <button class="edit-ingredient-button" data-ingredient-id="${_id}">編集</button>
         </div>
         <table class="substitute-table">
           <thead>
@@ -189,6 +191,15 @@ function filterAndDisplaySubstitutes() {
     // Add event listeners to delete buttons
     addDeleteButtonListeners();
 
+    // Add event listeners to edit ingredient buttons
+    document.querySelectorAll('.edit-ingredient-button').forEach(button => {
+      button.addEventListener('click', (event) => {
+        const ingredientId = event.target.getAttribute('data-ingredient-id');
+        console.log('Editing ingredient:', ingredientId);
+        handleEditIngredient(ingredientId);
+      });
+    });
+
     // Update pagination buttons
     prevButton.disabled = currentPage === 1;
     nextButton.disabled = currentPage === totalPages;
@@ -216,6 +227,107 @@ function filterAndDisplaySubstitutes() {
     noMySubstitutesMessage.style.display = 'block';
   }
 }
+
+// Function to handle editing an ingredient
+function handleEditIngredient(ingredientId) {
+  // Close any currently active input field
+  if (activeIngredientInput) {
+    const { element, originalName, ingredientId: activeIngredientId } = activeIngredientInput;
+    element.innerHTML = `
+      材料:　<span class="underline">${originalName}</span>
+      <button class="edit-ingredient-button" data-ingredient-id="${activeIngredientId}">編集</button>
+    `;
+    // Re-attach event listener for the edit button
+    document.querySelector(`.edit-ingredient-button[data-ingredient-id="${activeIngredientId}"]`).addEventListener('click', (event) => {
+      const ingredientId = event.target.getAttribute('data-ingredient-id');
+      handleEditIngredient(ingredientId);
+    });
+    activeIngredientInput = null;
+  }
+
+  const ingredientElement = document.querySelector(`.edit-ingredient-button[data-ingredient-id="${ingredientId}"]`).closest('.ingredient-header');
+  const ingredientNameElement = ingredientElement.querySelector('.underline');
+  const originalIngredientName = ingredientNameElement.textContent.trim();
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = originalIngredientName;
+  input.className = 'edit-ingredient-input';
+
+  const saveButton = document.createElement('button');
+  saveButton.textContent = '保存';
+  saveButton.className = 'save-ingredient-button';
+
+  const cancelButton = document.createElement('button');
+  cancelButton.textContent = '中止';
+  cancelButton.className = 'cancel-ingredient-button';
+
+  ingredientElement.innerHTML = '';
+  ingredientElement.appendChild(input);
+  ingredientElement.appendChild(saveButton);
+  ingredientElement.appendChild(cancelButton);
+
+  // Set the currently active input field
+  activeIngredientInput = { element: ingredientElement, originalName: originalIngredientName, ingredientId };
+
+  saveButton.addEventListener('click', async () => {
+    const newIngredientName = input.value.trim();
+    if (newIngredientName === '') {
+      alert('材料名を入力してください');
+      return;
+    }
+
+    if (newIngredientName === originalIngredientName) {
+      fetchMySubstitutes(); // Refresh the list to reset the ingredient-header
+      return;
+    }
+
+    const duplicate = allMySubstitutes.some(substitute => substitute.ingredient === newIngredientName);
+    if (duplicate) {
+      alert('その材料名はすでに登録されています');
+      return;
+    }
+
+    console.log('Updating ingredient:', ingredientId, newIngredientName);
+
+    try {
+      const response = await fetch(`/api/my-substitutes/ingredient/${ingredientId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ newIngredientName }) // Send newIngredientName in the request body
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update ingredient');
+      }
+
+      console.log('Ingredient updated:', newIngredientName);
+      fetchMySubstitutes(); // Refresh the list
+    } catch (error) {
+      console.error('Error updating ingredient:', error);
+    }
+  });
+
+  cancelButton.addEventListener('click', () => {
+    fetchMySubstitutes(); // Refresh the list to reset the ingredient-header
+  });
+}
+
+// Function to add event listeners to edit ingredient buttons
+function addEditIngredientButtonListeners() {
+  document.querySelectorAll('.edit-ingredient-button').forEach(button => {
+    button.addEventListener('click', (event) => {
+      const ingredientId = event.target.getAttribute('data-ingredient-id');
+      handleEditIngredient(ingredientId);
+    });
+  });
+}
+
+// Call this function after dynamically generating the buttons
+addEditIngredientButtonListeners();
 
 // Function to add a new substitute
 async function addNewSubstitute(substitute) {
