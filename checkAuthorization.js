@@ -35,7 +35,6 @@ async function fetchWithAuth(url, token) {
   return response.json();
 }
 
-// Example usage
 async function checkAuthorization() {
   const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzRkNWMwYTkzOWQyMmJiZDQ1MTliNWYiLCJlbWFpbCI6InMuc2NoaWt1bGFAZ21haWwuY29tIiwiaWF0IjoxNzMzMjk1ODI5LCJleHAiOjE3MzMyOTk0Mjl9.5Sx6Zwz4Y_zEmF0PChzli4pHLPkTtWSX7XRTIL5aIrM'; // Replace with your actual JWT token
   console.log('Token:', token);

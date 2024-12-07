@@ -664,9 +664,15 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
 
     checkedIngredients.forEach(ingredient => {
       const cleanedIngredient = extractText(ingredient);
-      const ingredientElement = Array.from(document.querySelectorAll('.ingredient-name')).
-        find(el => el.textContent.trim() === ingredient);
-      fetch(`/api/substitutes?ingredient=${encodeURIComponent(cleanedIngredient)}`)
+      const ingredientElement = Array.from(document.querySelectorAll('.ingredient-name'))
+        .find(el => el.textContent.trim() === ingredient);
+    
+      const token = localStorage.getItem('token'); // Get the token from local storage if it exists
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+      console.log("cleanedIngredient:" + cleanedIngredient);
+
+      fetch(`/api/substitutes?ingredient=${encodeURIComponent(cleanedIngredient)}`, { headers })
         .then(response => {
           if (response.status === 404) {
             return null; // Handle 404 response

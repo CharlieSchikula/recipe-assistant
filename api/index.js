@@ -5,10 +5,10 @@ import * as cheerio from 'cheerio';
 import authRoutes from '../middleware/auth.js';
 import Substitute from '../models/Substitute.js';
 import Favorite from '../models/Favorite.js';
-import mySubstitute from '../models/MySubstitute.js';
+import MySubstitute from '../models/MySubstitute.js';
 import { fileURLToPath } from 'url'; // Import fileURLToPath
 import { dirname } from 'path'; // Import dirname
-import { verifyToken } from '../middleware/auth.js';
+import { verifyToken, verifyTokenOptional } from '../middleware/auth.js';
 
 const __filename = fileURLToPath(import.meta.url); // Get the current file URL
 const __dirname = dirname(__filename); // Get the directory name
@@ -130,19 +130,42 @@ router.get('/api/recipe/title', async (req, res) => {
   }
 });
 
-// Define the substitutes route
-router.get('/api/substitutes', async (req, res) => {
+// Define the substitutes route for authenticated and unauthenticated users
+router.get('/api/substitutes', verifyTokenOptional, async (req, res) => {
+  console.log('Query parameters:', req.query); // Log the query parameters
+  console.log('User:', req.user); // Log the user object
   const ingredient = req.query.ingredient;
   if (!ingredient) {
     return res.status(400).send('Ingredient is required');
   }
 
   try {
-    const substitutes = await Substitute.findOne({ ingredient: ingredient });
-    if (!substitutes) {
-      return res.status(404).send('No substitutes found');
+    let mySubstitutes = [];
+    if (req.user) {
+      const email = req.user.email;
+      // Fetch user's my-substitutes if authenticated
+      const userSubstitutes = await MySubstitute.find({
+        email,
+        ingredient: { $regex: `(^|\\s|[\\/／]|\\b)${ingredient}(\\s|[\\/／]|\\b|$)`, $options: 'i' } // Case-insensitive search
+      });
+      mySubstitutes = userSubstitutes ? userSubstitutes.map(sub => sub.mySubstitutes).flat() : [];
+      console.log('User substitutes:', mySubstitutes); // Log user substitutes
     }
-    res.json(substitutes.substitutes);
+
+    // Fetch basic data for all users
+    const basicSubstitutes = await Substitute.find({
+      ingredient: { $regex: `(^|\\s|[\\/／]|\\b)${ingredient}(\\s|[\\/／]|\\b|$)`, $options: 'i' } // Case-insensitive search
+    });
+    const basicSubstitutesList = basicSubstitutes ? basicSubstitutes.map(sub => sub.substitutes).flat() : [];
+    console.log('Basic substitutes:', basicSubstitutesList); // Log basic substitutes
+
+    // Combine results
+    const combinedSubstitutes = {
+      mySubstitutes,
+      basicSubstitutes: basicSubstitutesList
+    };
+
+    res.json(combinedSubstitutes);
   } catch (error) {
     console.error('Error fetching substitutes:', error);
     res.status(500).send('Error fetching substitutes');
@@ -219,6 +242,7 @@ router.get('/api/favorites', verifyToken, async (req, res) => {
 
 // Fetch all favorite recipes for the authenticated user
 router.get('/api/favorites/all', verifyToken, async (req, res) => {
+  console.log("User:" + req.user);
   const email = req.user.email;
 
   try {
@@ -237,7 +261,7 @@ router.get('/api/my-substitutes', verifyToken, async (req, res) => {
   console.log('Fetching substitutes for user:', email); // Log the user email
 
   try {
-    const substitutes = await mySubstitute.find({ email });
+    const substitutes = await MySubstitute.find({ email });
     res.json(substitutes);
   } catch (error) {
     console.error('Error fetching substitutes:', error); // Log the error
@@ -255,9 +279,9 @@ router.post('/api/my-substitutes', verifyToken, async (req, res) => {
   console.log('Substitutes:', mySubstitutes); // Log the substitutes
 
   try {
-    let substitute = await mySubstitute.findOne({ email, ingredient });
+    let substitute = await MySubstitute.findOne({ email, ingredient });
     if (!substitute) {
-      substitute = new mySubstitute({ email, ingredient, mySubstitutes });
+      substitute = new MySubstitute({ email, ingredient, mySubstitutes });
     } else {
       mySubstitutes.forEach(newSub => {
         const existingSub = substitute.mySubstitutes.id(newSub._id);
@@ -290,7 +314,7 @@ router.put('/api/my-substitutes/:id', verifyToken, async (req, res) => {
   console.log('Substitutes:', mySubstitutes); // Log the substitutes
 
   try {
-    let substitute = await mySubstitute.findOne({ email, ingredient });
+    let substitute = await MySubstitute.findOne({ email, ingredient });
     if (!substitute) {
       return res.status(404).json({ success: false, message: 'Substitute not found' });
     }
@@ -322,12 +346,31 @@ router.delete('/api/my-substitutes/:id', verifyToken, async (req, res) => {
   console.log('Substitute ID:', id); // Log the substitute ID
 
   try {
-    const substitute = await mySubstitute.findOne({ email });
-    if (substitute) {
-      substitute.mySubstitutes = substitute.mySubstitutes.filter(sub => sub._id.toString() !== id);
-      await substitute.save();
+    const substitutes = await MySubstitute.find({ email });
+    if (substitutes.length > 0) {
+      let found = false;
+      substitutes.forEach(async (substitute) => {
+        console.log('Current substitutes:', substitute.mySubstitutes.map(sub => sub._id.toString())); // Log all substitute IDs
+
+        const initialLength = substitute.mySubstitutes.length;
+        substitute.mySubstitutes = substitute.mySubstitutes.filter(sub => sub._id.toString() !== id);
+        if (substitute.mySubstitutes.length !== initialLength) {
+          found = true;
+          await substitute.save();
+          console.log('Substitute removed:', id); // Log the removed substitute ID
+        }
+      });
+
+      if (!found) {
+        console.log('Substitute not found in any list:', id); // Log the substitute ID not found
+        return res.status(404).json({ success: false, message: 'Substitute not found' });
+      }
+
+      res.json({ success: true });
+    } else {
+      console.log('No substitutes found for user:', email); // Log no substitutes found for user
+      res.status(404).json({ success: false, message: 'Substitute not found' });
     }
-    res.json({ success: true });
   } catch (error) {
     console.error('Error removing substitute:', error); // Log the error
     res.status(500).json({ success: false, message: error.message });

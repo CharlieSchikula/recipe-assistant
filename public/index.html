@@ -75,6 +75,7 @@
             <ul id="ingredientList"></ul>
           </div>
           <div class="ingredients-footer">
+            <p>my代用品には<span class="star">★</span>が表示されます。</p>
             <button id="searchSubstitutesButton" style="display: none;">代用品を探す</button>
           </div>
         </div>
@@ -153,12 +154,13 @@
     </div>
 
     <!-- Modal for selecting a substitute -->
-    <div id="substituteModal" class="modal">
+    <div id="substitutesModal" class="modal">
       <div class="modal-content">
-        <span id="closeSubstituteModal" class="close">&times;</span>
+        <span id="closeSubstitutesModal" class="close">&times;</span>
         <h2>代用品を選択してください</h2>
+        <p>代用品を1つ選択して決定を押してください。<br>ログインされている場合、my代用品も表示されます。<br>my代用品には<span class="star">★</span>が表示されます。</p>
         <form id="substituteForm">
-          <ul id="substituteList"></ul>
+          <ul id="substitutesList"></ul>
           <button type="button" id="selectSubstitute">決定</button>
         </form>
       </div>

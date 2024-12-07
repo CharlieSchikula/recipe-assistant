@@ -296,6 +296,13 @@ header {
   border-radius: 8px;
 }
 
+.modal-content h2 {
+  margin: 0 0 10px 0;
+  color: darkslategray;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
 .modal-content p {
   margin: 10px 0;
 }
@@ -326,6 +333,16 @@ header {
   cursor: pointer;
 }
 
+/* Substitute item styling */
+.substitute-item {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.star {
+  color: orangered;
+  margin: 0 5px;
+}
 
 /* Login and Register form styles */
 #loginForm, #registerForm {
@@ -661,8 +678,11 @@ input:checked + .slider:before {
   accent-color: rgb(0, 120, 255);
 }
 
+.ingredients-footer {
+  margin-top: 20px;
+}
+
 #searchSubstitutesButton {
-  margin-top: 30px;
   padding: 10px 20px;
   background-color: darkcyan;
   color: white;
@@ -783,18 +803,18 @@ input:checked + .slider:before {
   background-color: #007b7f;
 }
 
-#substituteList {
+#substitutesList {
   list-style-type: none;
   padding-top: 10px;
 }
 
-#substituteList li {
+#substitutesList li {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
 }
 
-#substituteList li label {
+#substitutesList li label {
   margin-left: 10px;
 }
 

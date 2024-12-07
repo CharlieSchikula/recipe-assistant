@@ -109,9 +109,37 @@ export const verifyToken = async (req, res, next) => {
   }
 };
 
-// // Protected route example
-// app.get('/api/protected', verifyToken, (req, res) => {
-//   res.json({ message: 'This is protected data', user: req.user });
-// });
+// Optional verify token middleware
+export const verifyTokenOptional = async (req, res, next) => {
+  console.log('Headers:', req.headers); // Log all headers
+  const authHeader = req.headers.authorization;
+  console.log('Authorization Header:', authHeader); // Log the Authorization header
+
+  if (!authHeader) {
+    return next(); // No authorization header, proceed without authentication
+  }
+
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return next(); // No token, proceed without authentication
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    console.log('Decoded token:', decoded); // Log the decoded token
+
+    // Fetch user data from the database
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return next(); // User not found, proceed without authentication
+    }
+
+    req.user = user; // Attach user data to the req object
+  } catch (err) {
+    console.log('Token verification failed:', err); // Log token verification error
+    // Proceed without authentication
+  }
+  next();
+};
 
 export default router;

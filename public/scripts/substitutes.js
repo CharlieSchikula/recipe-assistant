@@ -1,5 +1,17 @@
-// Function to display a message when no substitutes are found or when multiple substitutes are found
+// Function to display substitutes
 export function displaySubstitutes(substitutes, ingredientElement, vegetarianMode, cleanedIngredient) {
+  const { mySubstitutes, basicSubstitutes } = substitutes;
+
+  // Tag mySubstitutes to distinguish them from basicSubstitutes
+  const taggedMySubstitutes = mySubstitutes.map(sub => ({ ...sub, isUserSubstitute: true }));
+  const taggedBasicSubstitutes = basicSubstitutes.map(sub => ({ ...sub, isUserSubstitute: false }));
+
+  // Combine and filter substitutes
+  let combinedSubstitutes = [...taggedMySubstitutes, ...taggedBasicSubstitutes];
+  let filteredSubstitutes = vegetarianMode
+    ? combinedSubstitutes.filter(substitute => substitute.vegetarian)
+    : combinedSubstitutes;
+
   // Remove any existing substitution containers
   const liElement = ingredientElement.closest('li'); // Find the closest li element
   if (liElement) {
@@ -8,13 +20,6 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
 
   const substituteContainer = document.createElement('div');
   substituteContainer.classList.add('substitute-container');
-
-  // Ensure substitutes is always an array
-  substitutes = substitutes || [];
-
-  const filteredSubstitutes = vegetarianMode
-    ? substitutes.filter(substitute => substitute.vegetarian)
-    : substitutes;
 
   if (!filteredSubstitutes || filteredSubstitutes.length === 0) {
     const noSubstitutesMessage = document.createElement('div');
@@ -26,18 +31,18 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
     const originalPortion = document.createElement('span');
     originalPortion.classList.add('portion');
     originalPortion.textContent = filteredSubstitutes[0].originalPortion;
-  
+
     const substitutePortion = document.createElement('span');
     substitutePortion.classList.add('portion');
     substitutePortion.textContent = filteredSubstitutes[0].substitutePortion;
-  
+
     const substituteName = document.createElement('span');
     substituteName.classList.add('substitute-name');
     substituteName.textContent = filteredSubstitutes[0].substituteName || 'No Info';
-  
+
     const ingredientNameStyled = `<span class="ingredient-name-styled">${cleanedIngredient}</span>`;
     substituteContainer.innerHTML = `${ingredientNameStyled} の分量 ${originalPortion.outerHTML} あたり ${substituteName.outerHTML} の分量 ${substitutePortion.outerHTML}`;
-  
+
     if (filteredSubstitutes[0].vegetarian) {
       const vegBox = document.createElement('span');
       vegBox.textContent = 'べジ';
@@ -49,26 +54,29 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
     multipleSubstitutesText.textContent = '複数の代用品が見つかりました';
     multipleSubstitutesText.classList.add('multiple-substitutes-list');
     multipleSubstitutesText.addEventListener('click', () => {
-      openSubstituteModal(filteredSubstitutes, substituteContainer, cleanedIngredient);
+      openSubstitutesModal(filteredSubstitutes, cleanedIngredient, substituteContainer);
     });
     substituteContainer.appendChild(multipleSubstitutesText);
   }
 
-  if (liElement) {
-    liElement.appendChild(substituteContainer); // Append substitute-container to the li element
-  } else {
-    ingredientElement.appendChild(substituteContainer); // Fallback in case liElement is not found
-  }
+  liElement.appendChild(substituteContainer); // Append the substitute container to the li element
 }
 
 // Function to open the modal to select a substitute when multiple substitutes are found
-function openSubstituteModal(substitutes, substituteContainer, cleanedIngredient) {
-  const modal = document.getElementById('substituteModal');
-  const substituteList = document.getElementById('substituteList');
-  const closeModal = document.getElementById('closeSubstituteModal');
+function openSubstitutesModal(substitutes, cleanedIngredient, substituteContainer) {
+  const substitutesModal = document.getElementById('substitutesModal');
+  const substitutesList = document.getElementById('substitutesList');
+  if (!substitutesModal || !substitutesList) {
+    console.error('Substitutes modal or list element not found');
+    return;
+  }
+  substitutesList.innerHTML = '';
 
-  // Clear previous substitutes
-  substituteList.innerHTML = '';
+  // Ensure substitutes is an array
+  if (!Array.isArray(substitutes)) {
+    console.error('Substitutes is not an array');
+    return;
+  }
 
   // Add substitutes to the list as radio buttons
   substitutes.forEach((substitute, index) => {
@@ -81,7 +89,10 @@ function openSubstituteModal(substitutes, substituteContainer, cleanedIngredient
     const label = document.createElement('label');
     label.htmlFor = `substitute-${index}`;
     const ingredientNameStyled = `<span class="ingredient-name-styled">${cleanedIngredient}</span>`;
-    label.innerHTML = `${ingredientNameStyled} の分量 <span class="portion">${substitute.originalPortion}</span> に対して <span class="substitute-name">${substitute.substituteName}</span> の分量 <span class="portion">${substitute.substitutePortion}</span>`;
+    label.innerHTML = `
+      ${substitute.isUserSubstitute ? '<span class="star">★</span>' : ''}
+      ${ingredientNameStyled} の分量 <span class="portion">${substitute.originalPortion}</span> に対して <span class="substitute-name">${substitute.substituteName}</span> の分量 <span class="portion">${substitute.substitutePortion}</span>
+    `;
     if (substitute.vegetarian) {
       const vegBox = document.createElement('span');
       vegBox.textContent = 'べジ';
@@ -90,33 +101,51 @@ function openSubstituteModal(substitutes, substituteContainer, cleanedIngredient
     }
     listItem.appendChild(radioInput);
     listItem.appendChild(label);
-    substituteList.appendChild(listItem);
+    substitutesList.appendChild(listItem);
   });
 
   // Show the modal
-  modal.style.display = 'block';
+  substitutesModal.style.display = 'block';
 
   // Close the modal when the close button is clicked
-  closeModal.onclick = () => {
-    modal.style.display = 'none';
-  };
+  const closeModal = document.getElementById('closeSubstitutesModal');
+  if (closeModal) {
+    closeModal.onclick = () => {
+      substitutesModal.style.display = 'none';
+    };
+  }
 
   // Close the modal when clicking outside of it
   window.onclick = (event) => {
-    if (event.target === modal) {
-      modal.style.display = 'none';
+    if (event.target === substitutesModal) {
+      substitutesModal.style.display = 'none';
     }
   };
 
-  document.getElementById('selectSubstitute').onclick = () => {
-    const selectedSubstitute = document.querySelector('input[name="substitute"]:checked');
-    if (selectedSubstitute) {
-      const selectedLabel = selectedSubstitute.nextElementSibling;
-      substituteContainer.innerHTML = `${selectedLabel.innerHTML}`;
-      substituteContainer.classList.add('substitute-container'); // Apply the class for styling
-      modal.style.display = 'none';
-    } else {
-      alert('代用品を選択してください。');
-    }
-  };
+  // Handle the selection of a substitute
+  const selectSubstituteButton = document.getElementById('selectSubstitute');
+  if (selectSubstituteButton) {
+    selectSubstituteButton.onclick = () => {
+      const selectedSubstitute = document.querySelector('input[name="substitute"]:checked');
+      if (selectedSubstitute) {
+        const selectedLabel = selectedSubstitute.nextElementSibling;
+        substituteContainer.innerHTML = `${selectedLabel.innerHTML}`;
+        substituteContainer.classList.add('substitute-container'); // Apply the class for styling
+        substitutesModal.style.display = 'none'; // Close the modal after selection
+      }
+    };
+  }
 }
+
+// Add event listener to close button for the modal
+document.addEventListener('DOMContentLoaded', () => {
+  const closeModal = document.getElementById('closeSubstitutesModal');
+  if (closeModal) {
+    closeModal.addEventListener('click', () => {
+      const substitutesModal = document.getElementById('substitutesModal');
+      if (substitutesModal) {
+        substitutesModal.style.display = 'none';
+      }
+    });
+  }
+});

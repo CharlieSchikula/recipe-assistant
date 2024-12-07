@@ -6,7 +6,6 @@ let currentPage = 1;
 const recipesPerPage = 10;
 let searchQuery = ''; // Initialize searchQuery as an empty string
 let allRecipes = []; // Store all recipes
-let isAuthorized = false; // Store authorization status
 
 // Function to check token validity
 function checkToken() {
@@ -41,7 +40,6 @@ function checkToken() {
 }
 
 if (checkToken()) {
-  isAuthorized = true; // Set authorization status
   setupHamburgerMenu();
   setupModals();
   renderWideScreenMenu('favorite-recipes');
