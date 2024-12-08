@@ -23,11 +23,12 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
 
   if (!filteredSubstitutes || filteredSubstitutes.length === 0) {
     const noSubstitutesMessage = document.createElement('div');
-    noSubstitutesMessage.textContent = `${cleanedIngredient}の用品が見つかりませんでした。`;
+    noSubstitutesMessage.textContent = `${cleanedIngredient}の代用品が見つかりませんでした。`;
     console.log('No substitutes found for:', cleanedIngredient);
     noSubstitutesMessage.classList.add('no-substitutes-message');
     liElement.appendChild(noSubstitutesMessage); // Append message after ingredient-container
   } else if (filteredSubstitutes.length === 1) {
+    const substitute = filteredSubstitutes[0];
     const originalPortion = document.createElement('span');
     originalPortion.classList.add('portion');
     originalPortion.textContent = filteredSubstitutes[0].originalPortion;
@@ -40,8 +41,10 @@ export function displaySubstitutes(substitutes, ingredientElement, vegetarianMod
     substituteName.classList.add('substitute-name');
     substituteName.textContent = filteredSubstitutes[0].substituteName || 'No Info';
 
-    const ingredientNameStyled = `<span class="ingredient-name-styled">${cleanedIngredient}</span>`;
-    substituteContainer.innerHTML = `${ingredientNameStyled} の分量 ${originalPortion.outerHTML} あたり ${substituteName.outerHTML} の分量 ${substitutePortion.outerHTML}`;
+    substituteContainer.innerHTML = `
+      ${substitute.isUserSubstitute ? '<span class="star">★</span>' : ''}
+      <span class="ingredient-name-styled">${cleanedIngredient}</span> の分量 <span class="portion">${substitute.originalPortion}</span> に対して <span class="substitute-name">${substitute.substituteName}</span> の分量 <span class="portion">${substitute.substitutePortion}</span>
+    `;
 
     if (filteredSubstitutes[0].vegetarian) {
       const vegBox = document.createElement('span');

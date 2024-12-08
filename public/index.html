@@ -56,16 +56,20 @@
       <div class="recipe-content">
         <div class="ingredients">
           <div class="ingredients-header">
-            <h2>材料</h2>
-            <div class="toggle-container">
-              <div class="toggle-wrapper">
-                <label for="vegetarianMode"><span class="veg-box">ベジ</span> モード</label>
-                <label class="switch">
-                  <input type="checkbox" id="vegetarianMode">
-                  <span class="slider round"></span>
-                </label> 
+            <div class="ingredients-header-container">
+              <h2>材料</h2>
+              <div class="toggle-container">
+                <div class="toggle-wrapper">
+                  <label for="vegetarianMode"><span class="veg-box">ベジ</span> モード</label>
+                  <label class="switch">
+                    <input type="checkbox" id="vegetarianMode">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="toggle-description">
+                  <p id="vegetarianDescription" class="vegetarian-description">肉、魚介類等も含め<br>全ての代用品が提示されます</p>
+                </div>
               </div>
-              <p id="vegetarianDescription" class="vegetarian-description">肉、魚介類等も含め<br>全ての代用品が提示されます</p>
             </div>
             <input type="checkbox" id="checkAll" class="check-all-button" style="display: none;">
           </div>

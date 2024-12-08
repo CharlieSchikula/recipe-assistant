@@ -176,7 +176,7 @@ ul#favoriteList li button.delete-button:hover {
 }
 
 #confirmDeleteButton {
-  border: 2px solid #aaa;
+  border: 1px solid #aaa;
   background-color: #ff4d4d;
   color: white;
 }

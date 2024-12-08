@@ -364,14 +364,37 @@ export function setupFetchRecipe(url = null) {
         await removeFromFavorites(url);
         button.querySelector('#emptyHeart').style.display = 'block';
         button.querySelector('#filledHeart').style.display = 'none';
+        showFadingMessage('お気に入りから削除されました');
         } else {
           const recipeId = extractRecipeId(url);
           const title = document.getElementById('recipeName').textContent;
           await addToFavorites(recipeId, url, title);
           button.querySelector('#emptyHeart').style.display = 'none';
           button.querySelector('#filledHeart').style.display = 'block';
+          showFadingMessage('お気に入りに登録されました');
         }
     }
+  }
+
+    // Function to show fading message
+  function showFadingMessage(message) {
+    const messageElement = document.createElement('div');
+    messageElement.className = 'fading-message';
+    messageElement.textContent = message;
+    document.body.appendChild(messageElement);
+
+    // Show the message
+    setTimeout(() => {
+      messageElement.classList.add('show');
+    }, 10);
+
+    // Hide and remove the message after 3 seconds
+    setTimeout(() => {
+      messageElement.classList.remove('show');
+      setTimeout(() => {
+        document.body.removeChild(messageElement);
+      }, 500);
+    }, 900);
   }
 
   // Function to check if a recipe is in the favorite list
@@ -529,6 +552,9 @@ export function setupFetchRecipe(url = null) {
           const ingredientContainer = document.createElement('div');
           ingredientContainer.classList.add('ingredient-container');
 
+          const ingredientContentContainer = document.createElement('div');
+          ingredientContentContainer.classList.add('ingredient-content-container');
+
           const ingredientName = document.createElement('span');
           ingredientName.classList.add('ingredient-name');
           ingredientName.textContent = ingredient.name;
@@ -544,8 +570,9 @@ export function setupFetchRecipe(url = null) {
 
             // Append checkbox, ingredient name, and ingredient quantity to the container
             ingredientContainer.appendChild(checkbox);
-            ingredientContainer.appendChild(ingredientName);
-            ingredientContainer.appendChild(ingredientQuantity);
+            ingredientContainer.appendChild(ingredientContentContainer);
+            ingredientContentContainer.appendChild(ingredientName);
+            ingredientContentContainer.appendChild(ingredientQuantity);
 
             // Add event listener for unchecking checkboxes
             checkbox.addEventListener('change', (event) => {
@@ -664,7 +691,7 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
 
   // Function to extract and normalize ingredient names
   function extractText(input) {
-    const pattern = /[★●◆✴︎]?([^\(\)（）]+)(?:\（.*?\）|\(.*?\))?/;
+    const pattern = /[^ぁ-んァ-ン一-龥]*([ぁ-んァ-ン一-龥][^\(\)（）]*)(?:\（.*?\）|\(.*?\))?/;
     const match = input.match(pattern);
     return match ? match[1].trim() : input;
   }
@@ -673,7 +700,7 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
   document.getElementById('searchSubstitutesButton').addEventListener('click', () => {
     
     const checkedIngredients = Array.from(document.querySelectorAll('.ingredient-checkbox:checked'))
-      .map(checkbox => checkbox.nextElementSibling.textContent.trim());
+    .map(checkbox => checkbox.closest('.ingredient-container').querySelector('.ingredient-name').textContent.trim());
 
     if (checkedIngredients.length === 0) {
       alert('１つ以上の材料を選択してください。');
