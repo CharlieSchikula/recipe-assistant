@@ -660,8 +660,10 @@ export function setupFetchRecipe(url = null) {
 
   // Add event listener for Fetch Recipe button
   document.getElementById('fetchRecipe').addEventListener('click', async () => {
-    const url = document.getElementById('urlInput').value.trim();
+    const urlInput = document.getElementById('urlInput');
+    const url = urlInput.value.trim();
     await fetchAndDisplayRecipe(url);
+    urlInput.value = ''; // Clear the search input
   });
 
   // If a URL is provided, fetch and display the recipe
