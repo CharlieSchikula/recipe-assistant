@@ -53,11 +53,11 @@
     <div id="loadingIndicator" style="display: none;">LOADING...</div>
     <div id="noMySubstitutesMessage" style="display: none;">my代用品が登録されていません</div>
     <div id="noFilteredSubstitutesMessage" style="display: none;">キーワードを含む my代用品 はありませんでした</div>
-    <button id="addNewSubstituteButton" class="submit-button">新規登録</button>
+    <button id="addNewSubstituteButton" class="submit-button">追加</button>
     <div id="mySubstitutesList"></div>
     <div class="pagination">
       <button id="prevButton" disabled>Prev</button>
-      <span id="pageIndicator">Page 1/1</span>
+      <span id="pageIndicator"></span>
       <button id="nextButton" disabled>Next</button>
     </div>
   </div>
@@ -122,7 +122,7 @@
   <div id="deleteSubstituteModal" class="modal">
     <div class="modal-content">
       <span id="closeDeleteSubstituteModal" class="close">&times;</span>
-      <p>本当に削除しますか？</p>
+      <p>削除してもよろしいですか？</p>
       <div class="button-container">
         <button id="confirmDeleteSubstituteButton">削除</button>
         <button id="cancelDeleteSubstituteButton">キャンセル</button>

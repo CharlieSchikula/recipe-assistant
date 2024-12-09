@@ -96,6 +96,8 @@ if (isAuthorized()) {
       const prevButton = document.getElementById('prevButton');
       const nextButton = document.getElementById('nextButton');
       const pageIndicator = document.getElementById('pageIndicator');
+      const deleteSelectedButton = document.getElementById('deleteSelectedButton');
+      const deleteSelectedButtonDesc = document.getElementById('deleteSelectedButtonDesc');
 
       if (allRecipes.length > 0) {
         favoriteList.innerHTML = '';
@@ -111,6 +113,8 @@ if (isAuthorized()) {
           pageIndicator.style.display = 'none';
           noFavoritesMessage.style.display = 'none';
           loadingIndicator.style.display = 'none';
+          deleteSelectedButton.style.display = 'none';
+          deleteSelectedButtonDesc.style.display = 'none';
           return;
         } else {
           noFilteredRecipesMessage.style.display = 'none';
@@ -127,11 +131,17 @@ if (isAuthorized()) {
         // Display all recipes at once
         paginatedRecipes.forEach(({ recipeId, url, title }) => {
           const listItem = document.createElement('li');
+          listItem.className = 'favorite-item'; // Add a class for styling
           listItem.innerHTML = `
-            <a href="${url}" target="_blank">${title}</a>
-            <div class="fav-recipe-buttons">
-              <button class="fav-search-recipe-button" data-recipe-url="${url}">検索</button>
-              <button class="delete-button" data-recipe-id="${recipeId}">削除</button>
+            <div class="favorite-item-content">
+              <div class="left-content">
+                <input type="checkbox" class="favorite-checkbox" data-recipe-id="${recipeId}">
+                <a href="${url}" target="_blank" class="recipe-title">${title}</a>
+              </div>
+              <div class="right-content fav-recipe-buttons">
+                <button class="fav-search-recipe-button" data-recipe-url="${url}">検索</button>
+                <button class="delete-button" data-recipe-id="${recipeId}">削除</button>
+              </div>
             </div>
           `;
           favoriteList.appendChild(listItem);
@@ -140,8 +150,57 @@ if (isAuthorized()) {
         // Add event listeners to delete buttons
         document.querySelectorAll('.delete-button').forEach(button => {
           button.addEventListener('click', (event) => {
-            recipeIdToDelete = event.target.getAttribute('data-recipe-id');
-            openConfirmDeleteModal();
+            const recipeId = event.target.getAttribute('data-recipe-id');
+            const recipeUrl = allRecipes.find(recipe => recipe.recipeId === recipeId).url;
+            console.log ("Trying To Remove Recipe From Favorites: ", recipeUrl);
+            openConfirmDeleteModal('削除してもよろしいですか？', async () => {
+              try {
+                await removeFromFavorites(recipeUrl);
+                closeConfirmDeleteModal();
+                window.location.reload();
+              } catch (error) {
+                console.error('Error deleting favorite:', error);
+              }
+            });
+          });
+        });
+
+        // Add event listener to the deleteSelectedButton
+        deleteSelectedButton.addEventListener('click', () => {
+          const selectedFavorites = Array.from(document.querySelectorAll('.favorite-checkbox:checked'))
+            .map(checkbox => checkbox.closest('li'));
+
+          if (selectedFavorites.length === 0) {
+            alert('一つ以上の項目を選択してください。');
+            return;
+          }
+
+          // Get the array of data-recipe-id attributes
+          const selectedRecipeIds = selectedFavorites.map(favoriteItem => favoriteItem.querySelector('.favorite-checkbox').getAttribute('data-recipe-id'));
+          console.log("Trying To Remove Selected Recipes From Favorites: ", selectedRecipeIds);
+
+          // Open the confirm delete modal
+          openConfirmDeleteModal('選択された項目が全て削除されます。<br>よろしいですか？', async () => {
+            // Function to delete favorites sequentially
+            for (const favoriteItem of selectedFavorites) {
+              const recipeId = favoriteItem.querySelector('.favorite-checkbox').getAttribute('data-recipe-id');
+              const recipeUrl = allRecipes.find(recipe => recipe.recipeId === recipeId).url;
+              try {
+                const response = await removeFromFavorites(recipeUrl);
+                if (response.success) {
+                  console.log("Removed URL: " + recipeUrl);
+                  // Remove the favorite item from the DOM
+                  favoriteItem.remove();
+                } else {
+                  console.error('Error deleting favorite:', response.message);
+                }
+              } catch (error) {
+                console.error('Error deleting favorite:', error);
+              }
+            }
+
+            closeConfirmDeleteModal();
+            window.location.reload(); // Reload the page after all deletions are completed
           });
         });
 
@@ -165,6 +224,8 @@ if (isAuthorized()) {
         prevButton.style.display = 'inline-block';
         nextButton.style.display = 'inline-block';
         pageIndicator.style.display = 'inline-block';
+        deleteSelectedButton.style.display = 'block';
+        deleteSelectedButtonDesc.style.display = 'block';
         noFavoritesMessage.style.display = 'none';
       } else {
         // No favorite recipes found
@@ -172,6 +233,8 @@ if (isAuthorized()) {
         prevButton.style.display = 'none';
         nextButton.style.display = 'none';
         pageIndicator.style.display = 'none';
+        deleteSelectedButton.style.display = 'none';
+        deleteSelectedButtonDesc.style.display = 'none';
         noFavoritesMessage.style.display = 'block';
       }
     } catch (error) {
@@ -184,27 +247,20 @@ if (isAuthorized()) {
     }
   }
 
-  // Function to remove a recipe from the favorite list
-  async function removeFromFavorites(url) {
-    const token = localStorage.getItem('token');
-    console.log('Removing Recipe From Favorites: ', url);
-    const response = await fetch(`/api/favorites?url=${encodeURIComponent(url)}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    const data = await response.json();
-    console.log("Response For Deleting Favorite: ", data);
-    return data;
-  }
-
   // Function to open the confirm delete modal
-  function openConfirmDeleteModal() {
+  function openConfirmDeleteModal(message, onConfirm) {
     const confirmDeleteModal = document.getElementById('confirmDeleteModal');
-    if (confirmDeleteModal) {
-      confirmDeleteModal.style.display = 'block';
-    }
+    const confirmDeleteMessage = document.getElementById('confirmDeleteMessage');
+    confirmDeleteMessage.innerHTML = message;
+    confirmDeleteModal.style.display = 'block';
+
+    // Remove any existing event listeners on the confirm button
+    const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+    const newConfirmDeleteButton = confirmDeleteButton.cloneNode(true);
+    confirmDeleteButton.parentNode.replaceChild(newConfirmDeleteButton, confirmDeleteButton);
+
+    // Add the new event listener
+    newConfirmDeleteButton.addEventListener('click', onConfirm);
   }
 
   // Function to close the confirm delete modal
@@ -226,33 +282,25 @@ if (isAuthorized()) {
     }
   });
 
-  // Handle confirm delete action
-  document.getElementById('confirmDeleteButton').addEventListener('click', async () => {
-    if (recipeIdToDelete) {
-      if (!isAuthorized()) return; // Check token validity before proceeding
-      const listItem = document.querySelector(`button[data-recipe-id="${recipeIdToDelete}"]`).parentElement.parentElement;
-      if (listItem) {
-        const urlElement = listItem.querySelector('a');
-        if (urlElement) {
-          const url = urlElement.href;
-          await removeFromFavorites(url);
-          allRecipes = allRecipes.filter(recipe => recipe.url !== url); // Remove from stored data
-          fetchFavoriteRecipes(currentPage, searchQuery); // Refresh the list
-          closeConfirmDeleteModal();
-        } else {
-          console.error('URL element not found');
-        }
-      } else {
-        console.error('List item not found');
-      }
-    }
-  });
-
   // Handle cancel delete action
   document.getElementById('cancelDeleteButton').addEventListener('click', () => {
     recipeIdToDelete = null;
     closeConfirmDeleteModal();
   });
+
+  // Function to remove a favorite recipe from the database
+  async function removeFromFavorites(url) {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`/api/favorites?url=${encodeURIComponent(url)}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await response.json();
+    console.log("Response For Deleting Favorite: ", data);
+    return data;
+  }
 
   // Debounce function to limit the rate at which a function can fire
   function debounce(func, wait) {

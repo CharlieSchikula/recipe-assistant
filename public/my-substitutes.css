@@ -246,23 +246,38 @@ p {
   width: 800px;
 }
 
+/* Flexbox styling for ingredient header */
 .ingredient-header {
   font-size: 1.125rem;
   font-weight: bold;
   margin-bottom: 10px;
   color: darkslategray;
+  display: flex;
+  flex-direction: column; /* Ensure children are stacked vertically */
+}
+
+.ingredient-header label {
+  margin: 0 10px 0 0; /* Add space to the right of the label */
+  white-space: nowrap;
+  display: flex;
+  align-items: center; /* Vertically center the label */
+}
+
+.ingredient-header input {
+  flex: 1;
 }
 
 .substitute-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .substitute-table th, .substitute-table td {
   border: 1px solid #ccc;
   text-align: center;
   padding: 6px;
+  height: auto; /* Allow the height to adjust based on content */
 }
 
 .substitute-table th {
@@ -289,7 +304,15 @@ p {
 
 .substitute-table th:nth-child(5),
 .substitute-table td:nth-child(5) {
+  display: table-cell; /* Ensure the 5th column behaves like a table cell */
   width: auto;
+}
+
+@media (min-width: 481px) {
+  .substitute-table th:nth-child(5), .substitute-table td:nth-child(5) {
+    /* display: table-cell; Ensure the 5th column behaves like a table cell */
+    width: 150px;
+  }
 }
 
 /* Underline ingredient */
@@ -311,19 +334,12 @@ p {
   }
 }
 
-.substitute-table th:nth-child(5), .substitute-table td:nth-child(5) {
-  width: 150px;
-  align-items: center;
-  text-align: center;
-}
-
 .substitute-table .my-substitutes-button {
   display: flex;
   justify-content: center;
-  gap: 10px;
 }
 
-.edit-ingredient-button, .delete-ingredient-button, #cancelIngredientFormButton, #cancelSubstituteFormButton, .save-ingredient-button, .cancel-ingredient-button, .edit-substitute-button, .delete-substitute-button {
+.edit-ingredient-button, .delete-ingredient-button, #cancelIngredientFormButton, #cancelSubstituteFormButton, .save-ingredient-button, .cancel-ingredient-button, .add-substitute-button, .edit-substitute-button, .delete-substitute-button {
   padding: 5px 5px;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -343,6 +359,10 @@ p {
   font-size: 1rem;
 }
 
+.add-substitute-button {
+  margin: 8px 0 0 10px;
+}
+
 .save-ingredient-button, .cancel-ingredient-button {
   margin-left: 5px;
   font-size: 1rem;
@@ -354,12 +374,12 @@ p {
   min-width: 100px;
 }
 
-.edit-substitute-button, .edit-ingredient-button, .save-ingredient-button {
+.edit-substitute-button, .edit-ingredient-button, .save-ingredient-button, .add-substitute-button {
   background-color: darkcyan;
   color: #fff;
 }
 
-.edit-substitute-button:hover, .edit-ingredient-button:hover, .save-ingredient-button:hover {
+.edit-substitute-button:hover, .edit-ingredient-button:hover, .save-ingredient-button:hover, .add-substitute-button:hover {
   background-color: #007b7f;
 }
 
@@ -405,24 +425,6 @@ p {
 .modal-content input[readonly] {
   background-color: #f0f0f0;
   cursor: not-allowed;
-}
-
-/* Flexbox styling for ingredient header */
-.ingredient-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.ingredient-header label {
-  margin: 0 10px 0 0; /* Add space to the right of the label */
-  white-space: nowrap;
-  display: flex;
-  align-items: center; /* Vertically center the label */
-}
-
-.ingredient-header input {
-  flex: 1;
 }
 
 .modal-ingredient-header {
@@ -479,7 +481,7 @@ input:-webkit-autofill:active {
   .my-substitutes-button {
     flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 10px;
   }
 
   .edit-substitute-button, .delete-substitute-button, .edit-ingredient-button, .save-ingredient-button, .cancel-ingredient-button {

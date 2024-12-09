@@ -38,6 +38,7 @@ ul#favoriteList {
 }
 
 #prevButton {
+  display: none;
   background-color: #007bff;
   color: white;
 }
@@ -48,6 +49,7 @@ ul#favoriteList {
 }
 
 #nextButton {
+  display: none;
   background-color: #007bff;
   color: white;
 }
@@ -77,8 +79,6 @@ ul#favoriteList li {
   margin: 10px 0;
   padding: 10px;
   border: 1px solid #ddd;
-  display: flex;
-  justify-content: space-between;
   align-items: center;
 }
 
@@ -88,11 +88,11 @@ ul#favoriteList li a {
   color: #333;
 }
 
-.fav-search-recipe-button, ul#favoriteList li button.delete-button {
+.fav-search-recipe-button, ul#favoriteList li button.delete-button, #deleteSelectedButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px 5px;
+  padding: 5px;
   border: 1px solid #ccc;
   border-radius: 8px;
   cursor: pointer;
@@ -111,19 +111,50 @@ ul#favoriteList li a {
   background-color: #007b7f;
 }
 
-ul#favoriteList li button.delete-button {
+#deleteSelectedButton {
+  display: none;
+  margin-top: 20px;
+  padding: 5px 10px;
+}
+
+#deleteSelectedButtonDesc {
+  display:none;
+  font-size: 0.875rem;
+  margin-left: 5px;
+}
+
+.favorite-item-content {
+  display: flex;
+  align-items: center;
+}
+
+.left-content {
+  display: flex;
+  align-items: center;
+}
+
+.favorite-checkbox {
+  margin-right: 10px;
+}
+
+.recipe-title {
+  margin-right: 10px; /* Add some space between the recipe title and the buttons */
+}
+
+/* Container for buttons to manage spacing */
+.right-content {
+  display: flex;
+  gap: 10px; /* Space between buttons */
+  margin-left: auto; /* Push the buttons to the right */
+}
+
+ul#favoriteList li button.delete-button, #deleteSelectedButton {
   background-color: #ff4d4d;
   color: #fff;
 }
 
-ul#favoriteList li button.delete-button:hover {
+ul#favoriteList li button.delete-button:hover, #deleteSelectedButton:hover {
   background-color: #ff1a1a;
-}
-
-/* Container for buttons to manage spacing */
-.fav-recipe-buttons {
-  display: flex;
-  gap: 10px; /* Space between buttons */
 }
 
 @media (max-width: 480px) {

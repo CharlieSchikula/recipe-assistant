@@ -24,7 +24,7 @@ app.use(express.static(path.join(__dirname, '../public'))); // Adjust the path t
 
 router.use('/api/auth', authRoutes);
 
-// Protected route example
+// Protected route
 app.get('/api/protected', verifyToken, (req, res) => {
   res.json({ message: 'This is protected data', user: req.user });
 });

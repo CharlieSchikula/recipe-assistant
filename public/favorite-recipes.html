@@ -50,12 +50,17 @@
       <input type="text" id="filterInput" placeholder="キーワードで絞り込む">
     </div>
     <div id="loadingIndicator" style="display: none;">LOADING...</div>
-    <ul id="favoriteList"></ul>
+    <button id="deleteSelectedButton">選択した項目を削除</button>
+    <p id="deleteSelectedButtonDesc">ページを移動するとチェックが解除されます。</p>
+    <ul id="favoriteList">
+      <li>
+      </li>
+    </ul>
     <div id="noFavoritesMessage" style="display: none;">お気に入りのレシピが登録されていません</div>
     <div id="noFilteredRecipesMessage" style="display: none;">キーワードを含むレシピはありませんでした</div>
     <div class="pagination">
       <button id="prevButton" disabled>Prev</button>
-      <span id="pageIndicator">Page 1/1</span>
+      <span id="pageIndicator"></span>
       <button id="nextButton" disabled>Next</button>
     </div>
   </div>
@@ -73,7 +78,7 @@
   <div id="confirmDeleteModal" class="modal">
     <div class="modal-content">
       <span id="closeConfirmDeleteModal" class="close">&times;</span>
-      <p>本当に削除しますか？</p>
+      <p id="confirmDeleteMessage">削除してもよろしいですか？</p>
       <div class="button-container">
         <button id="confirmDeleteButton">削除</button>
         <button id="cancelDeleteButton">キャンセル</button>

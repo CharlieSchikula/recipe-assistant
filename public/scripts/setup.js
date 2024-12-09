@@ -467,7 +467,7 @@ export function setupFetchRecipe(url = null) {
     errorMessage.textContent = '';
 
     if (!url) {
-      alert('URLを入力して「送信」を押して下さい');
+      alert('URLを入力して「送信」を押してください');
       loadingSpinner.style.display = 'none'; // Hide loading spinner
       return;
     }
