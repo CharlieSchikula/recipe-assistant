@@ -7,6 +7,7 @@ let searchQueryIngredients = ''; // Initialize searchQueryIngredients as an empt
 let searchQuerySubstitutes = ''; // Initialize searchQuerySubstitutes as an empty string
 let currentPage = 1;
 const mySubstitutesPerPage = 5;
+let totalPages = 0; // Initialize totalPages
 let originalIngredient = ''; // Store the original ingredient value
 let activeIngredientInput = null; // Track the currently active input field
 let ingredientIdToDelete = null; // Track the ingredient to delete
@@ -66,8 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (event.target.classList.contains('delete-ingredient-button')) {
       const ingredientId = event.target.getAttribute('data-ingredient-id');
       const ingredientName = event.target.closest('.ingredient-header').querySelector('.underline').textContent.trim();
-      openDeleteIngredientModal(ingredientId, ingredientName)
       console.log('Trying To Remove Ingredient:', ingredientId);
+      openDeleteIngredientModal(ingredientId, ingredientName)
     }
   });
 
@@ -113,6 +114,16 @@ document.addEventListener('DOMContentLoaded', () => {
       openDeleteSubstituteModal(substituteId);
     }
   });
+
+  // Event listener for filter inputs
+  document.getElementById('filterInputForIngredients').addEventListener('input', () => {
+    currentPage = 1; // Reset to the first page
+    filterAndDisplaySubstitutes();
+  });
+  document.getElementById('filterInputForSubstitutes').addEventListener('input', () => {
+    currentPage = 1; // Reset to the first page
+    filterAndDisplaySubstitutes();
+  });
 });
 
 async function fetchMySubstitutes() {
@@ -129,6 +140,14 @@ async function fetchMySubstitutes() {
     const data = await response.json();
     console.log('Fetched substitutes:', data); // Log the fetched data
     allMySubstitutes = data || [];
+
+    // Calculate total pages based on fetched data
+    totalPages = Math.ceil(allMySubstitutes.length / mySubstitutesPerPage);
+
+    // Ensure currentPage is within the valid range
+    if (currentPage > totalPages) {
+    currentPage = totalPages;
+    }
 
     filterAndDisplaySubstitutes(); // Filter and display substitutes
   } catch (error) {
@@ -173,21 +192,42 @@ function filterAndDisplaySubstitutes() {
       noFilteredSubstitutesMessage.style.display = 'none';
     }
 
+    // Calculate total pages based on filtered data
+    totalPages = Math.ceil(filteredSubstitutes.length / mySubstitutesPerPage);
+
+    // Ensure currentPage is within the valid range
+    if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
+
     displaySubstitutes(filteredSubstitutes, currentPage, mySubstitutesPerPage);
+
+    // Show pagination and page indicator
+    prevButton.style.display = 'inline-block';
+    nextButton.style.display = 'inline-block';
+    pageIndicator.style.display = 'inline-block';
+    noMySubstitutesMessage.style.display = 'none';
+
+    // Remove existing event listeners to prevent multiple triggers
+    prevButton.removeEventListener('click', handlePrevButtonClick);
+    nextButton.removeEventListener('click', handleNextButtonClick);
+
+    // Add event listeners for pagination buttons
+    prevButton.addEventListener('click', handlePrevButtonClick);
+    nextButton.addEventListener('click', handleNextButtonClick);
   } else {
     // No substitutes found
-    noMySubstitutesMessage.style.display = 'block';
+    mySubstitutesList.innerHTML = '';
     prevButton.style.display = 'none';
     nextButton.style.display = 'none';
     pageIndicator.style.display = 'none';
+    noMySubstitutesMessage.style.display = 'block';
   }
 }
 
 // Function to display substitutes
 function displaySubstitutes(filteredSubstitutes, currentPage, mySubstitutesPerPage) {
   const pageIndicator = document.getElementById('pageIndicator');
-
-  // Display current index before fetching titles
   const totalPages = Math.ceil(filteredSubstitutes.length / mySubstitutesPerPage);
   pageIndicator.textContent = `Page ${currentPage}/${totalPages}`;
 
@@ -245,22 +285,25 @@ function displaySubstitutes(filteredSubstitutes, currentPage, mySubstitutesPerPa
   });
 
   // Update pagination buttons
-  const prevButton = document.getElementById('prevButton');
-  const nextButton = document.getElementById('nextButton');
   prevButton.disabled = currentPage === 1;
   nextButton.disabled = currentPage === totalPages;
-
-
-  prevButton.onclick = () => {
-    currentPage--;
-    filterAndDisplaySubstitutes();
-  };
-  nextButton.onclick = () => {
-    currentPage++;
-    filterAndDisplaySubstitutes();
-  };
 }
 
+// Function to handle previous button click
+function handlePrevButtonClick() {
+  if (currentPage > 1) {
+    currentPage--;
+    filterAndDisplaySubstitutes();
+  }
+}
+
+// Function to handle next button click
+function handleNextButtonClick() {
+  if (currentPage < totalPages) {
+    currentPage++;
+    filterAndDisplaySubstitutes();
+  }
+}
 
 // 3. Add my substitute
 async function addNewSubstitute(substitute) {
@@ -542,7 +585,6 @@ if (confirmDeleteIngredientButton) {
       await handleDeleteIngredient(ingredientIdToDelete);
       ingredientIdToDelete = null;
       closeDeleteIngredientModal();
-      fetchMySubstitutes(); // Refresh the list
     }
   });
 }

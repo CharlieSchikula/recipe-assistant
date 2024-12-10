@@ -694,7 +694,7 @@ document.getElementById('vegetarianMode').addEventListener('change', () => {
   // Function to extract and normalize ingredient names
   function extractText(input) {
     // Regular expression to match the desired pattern
-    const pattern = /^[^ぁ-んァ-ン一-龥]*([ぁ-んァ-ン一-龥ー]+(?:[ぁ-んァ-ン一-龥ー]|XO醤)*).*$/;
+    const pattern = /^[^ぁ-んァ-ン一-龥]*([ぁ-んァ-ン一-龥ー]+(?:[ぁ-んァ-ン一-龥ー])*).*$/;
     const match = input.match(pattern);
     return match ? match[1].trim() : input;
   }
