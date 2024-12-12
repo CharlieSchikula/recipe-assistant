@@ -17,7 +17,7 @@ router.post('/register', [
     .matches(/[a-z]/).withMessage('Password must contain a lowercase letter')
     .matches(/[0-9]/).withMessage('Password must contain a number')
 ], async (req, res) => {
-  console.log('Register request received'); // Log the request
+  console.log('Register request received'); // Log register request
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -45,7 +45,7 @@ router.post('/login', [
   check('email').isEmail().withMessage('Invalid email format'),
   check('password').exists().withMessage('Password is required')
 ], async (req, res) => {
-  console.log('Login request received'); // Log the request
+  console.log('Login request received'); // Log login request
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -62,7 +62,6 @@ router.post('/login', [
   }
 
   console.log(`User found: ${JSON.stringify(user)}`); // Log the user object
-  console.log(`Hashed password from DB: ${user.password}`); // Log the hashed password from the database
 
   const isMatch = await user.matchPassword(password); // Use the matchPassword method
   console.log(`Password comparison for ${email}: ${isMatch}`); // Log the result of the password comparison
@@ -92,7 +91,6 @@ export const verifyToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    console.log('Decoded token:', decoded); // Log the decoded token
 
     // Fetch user data from the database
     const user = await User.findById(decoded.userId);
@@ -108,11 +106,9 @@ export const verifyToken = async (req, res, next) => {
   }
 };
 
-// Optional verify token middleware
+// Optional verify token middleware for top page (since not all users are logged in)
 export const verifyTokenOptional = async (req, res, next) => {
-  console.log('Headers:', req.headers); // Log all headers
   const authHeader = req.headers.authorization;
-  console.log('Authorization Header:', authHeader); // Log the Authorization header
 
   if (!authHeader) {
     return next(); // No authorization header, proceed without authentication
@@ -125,7 +121,6 @@ export const verifyTokenOptional = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    console.log('Decoded token:', decoded); // Log the decoded token
 
     // Fetch user data from the database
     const user = await User.findById(decoded.userId);
@@ -133,7 +128,8 @@ export const verifyTokenOptional = async (req, res, next) => {
       return next(); // User not found, proceed without authentication
     }
 
-    req.user = user; // Attach user data to the req object
+    // if the user is logged in, attach user data to the req object
+    req.user = user;
   } catch (err) {
     console.log('Token verification failed:', err); // Log token verification error
     // Proceed without authentication

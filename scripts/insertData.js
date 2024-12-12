@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import Substitute from './models/Substitute.js'; // Ensure the file extension is included
+import Substitute from '../models/Substitute.js'; // Ensure the file extension is included
 
 dotenv.config(); // Load environment variables from .env file
 

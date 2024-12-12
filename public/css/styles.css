@@ -86,7 +86,7 @@ header {
 }
 
 .title-break {
-  display: block; /* Force line break */
+  display: block;
   color: #FF9933;
   font-size: 1.5rem;
   font-style: italic;
@@ -269,13 +269,13 @@ header {
 
 .hamburger-menu hr {
   border: none;
-  border-top: 4px solid darkcyan; /* Set the horizontal line to dark cyan */
+  border-top: 4px solid darkcyan;
   margin: 10px 0;
 }
 
 /* Modal styles */
 .modal {
-  display: none; /* Hidden by default */
+  display: none;
   position: fixed; /* Stay in place */
   z-index: 2000; /* Sit on top */
   left: 0;
@@ -309,9 +309,9 @@ header {
 }
 
 #imageModal {
-  display: none; /* Use Flexbox */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
+  display: none;
+  justify-content: center;
+  align-items: center;
 }
 
 #imageModal img {
@@ -368,7 +368,7 @@ header {
   font-size: 0.875rem;
   margin-top: -10px;
   margin-bottom: 10px;
-  display: none; /* Hidden by default */
+  display: none;
 }
 
 #errorMessage {
@@ -388,7 +388,7 @@ header {
 /* Logout modal styles */
 #logoutModal .modal-content {
   max-width: 400px; /* Maximum width for the logout modal */
-  text-align: center; /* Center-align text and buttons */
+  text-align: center;
 }
 
 #logoutModal p {
@@ -429,13 +429,13 @@ header {
 
 /* Styles for the expanded image modal */
 .expanded-image-modal {
-  display: none; /* Hidden by default */
+  display: none;
   position: fixed; /* Stay in place */
   z-index: 1000; /* Sit on top */
   left: 0;
   top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
+  width: 100%;
+  height: 100%;
   overflow: auto; /* Enable scroll if needed */
   background-color: rgba(0, 0, 0, 0.7); /* Transparent gray background */
 }
@@ -443,12 +443,12 @@ header {
 .expanded-image-modal-content {
   margin: auto;
   display: block;
-  max-width: 90%; /* 90% display width on narrow screens */
+  max-width: 90%;
 }
 
 @media (min-width: 769px) {
   .expanded-image-modal-content {
-    max-width: 690px; /* 690px on wide screens */
+    max-width: 690px;
   }
 }
 
@@ -476,7 +476,7 @@ header {
   border: 1px solid #ccc;
   border-radius: 8px;
   background-color: #fff;
-  min-height: 85px; /* Set a minimum height for consistency */
+  min-height: 85px;
 }
 
 .ingredients h2, .steps h2, .advice h2 {
@@ -496,16 +496,16 @@ header {
 
 .toggle-container {
   display: flex;
-  flex-direction: column; /* Stack items vertically */
-  align-items: flex-end; /* Align items to the left */
+  flex-direction: column;
+  align-items: flex-end;
   margin-bottom: 10px;
 }
 
 .toggle-wrapper {
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* Distribute space between toggle and description */
-  width: 100%; /* Ensure it takes the full width */
+  justify-content: flex-end;
+  width: 100%;
 }
 
 .vegetarian-description {
@@ -569,7 +569,7 @@ input:checked + .slider:before {
 .search-container {
   display: flex;
   align-items: center;
-  justify-content: center; /* Center the container horizontally */
+  justify-content: center;
   margin-bottom: 10px;
   max-width: 970px;
   margin: 25px auto; /* Center the container within its parent */
@@ -596,8 +596,8 @@ input:checked + .slider:before {
   border-radius: 8px;
   cursor: pointer;
   height: 40px;
-  min-width: 60px; /* Set a fixed width for the button */
-  font-weight: bold; /* Ensure the font is bold */
+  min-width: 60px;
+  font-weight: bold;
 }
 
 #fetchRecipe:hover {
@@ -605,7 +605,7 @@ input:checked + .slider:before {
 }
 
 .input-instruction {
-  flex-basis: 100%; /* Ensure the text takes the full width */
+  flex-basis: 100%;
   text-align: left;
   margin: 10px 0 0 10px; /* Add some space above the text */
   font-size: 14px;
@@ -629,7 +629,7 @@ input:checked + .slider:before {
 .recipe-name-box {
   display: flex;
   align-items: center;
-  justify-content: center; /* Center the content horizontally */
+  justify-content: center;
   margin: 20px auto; /* Center the box itself */
 }
 
@@ -637,8 +637,8 @@ input:checked + .slider:before {
   font-size: 2rem;
   color: darkslategray;
   margin-right: 10px; /* Add some space between the recipe name and the favorite button */
-  text-align: left; /* Align text to the left */
-  display: block; /* Ensure the element behaves as a block-level element */
+  text-align: left;
+  display: block;
   word-wrap: break-word; /* Ensure long words break to fit within the container */
 }
 
@@ -650,7 +650,7 @@ input:checked + .slider:before {
 }
 
 .favorite-button {
-  background-color: transparent; /* Ensure the background is transparent */
+  background-color: transparent;
   border: none;
   cursor: pointer;
   padding-left: 5px;
@@ -665,7 +665,7 @@ input:checked + .slider:before {
 }
 
 .favorite-button svg#emptyHeart {
-  fill: lightgray; /* Set the filled heart color */
+  fill: lightgray;
   stroke: lightgray;
 }
 
@@ -1011,7 +1011,7 @@ input:checked + .slider:before {
   }
 
   .image-container img {
-    display: block; /* Ensure all images are displayed */
+    display: block;
   }
 }
 
@@ -1033,7 +1033,7 @@ input:checked + .slider:before {
   .image-container img {
     display: none; /* Hide all images initially */
     max-width: 240px; /* Increase the max-width for wide screens */
-    width: 100%; /* Ensure the image takes up the full width */
+    width: 100%;
   }
 
   .image-container img:first-child {
@@ -1052,7 +1052,7 @@ input:checked + .slider:before {
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer; /* Change cursor to pointer on hover */
+    cursor: pointer;
     z-index: 20; /* Ensure the arrows are above the images */
     user-select: none; /* Prevent text selection */
   }
@@ -1102,12 +1102,12 @@ input:checked + .slider:before {
   }
 
   .ingredients {
-    flex: 0 0 324px; /* Fixed width of 268px */
-    padding: 20px 10px 20px 25px; /* Adjust padding for better appearance */
+    flex: 0 0 324px;
+    padding: 20px 10px 20px 25px;
     margin-right: 20px; /* Add space between ingredients and steps-advice-container */
     display: flex;
     flex-direction: column;
-    height: auto; /* Allow the height to adjust based on content */
+    height: auto;
     max-height: 95vh; /* Set maximum height to viewport height */
     position: relative; /* Ensure the button is positioned relative to this container */
   }
@@ -1115,9 +1115,9 @@ input:checked + .slider:before {
   .ingredients-header {
     position: sticky;
     top: 0;
-    background-color: white; /* Ensure the background covers content behind */
+    background-color: white;
     z-index: 1; /* Ensure it stays above other content */
-    padding: 10px 0; /* Add some padding for better appearance */
+    padding: 10px 0;
   }
 
   .ingredients-content {
@@ -1130,7 +1130,7 @@ input:checked + .slider:before {
     position: sticky;
     bottom: 0; /* Stick to the bottom of the container */
     left: 0;
-    width: calc(100% - 25px); /* Full width of the container minus 25px */
+    width: calc(100% - 25px); /* Adjust width to account for padding */
     padding: 10px 20px;
   }
 
@@ -1146,8 +1146,8 @@ input:checked + .slider:before {
 }
 
 .loading-spinner {
-  border: 16px solid #f3f3f3; /* Light grey */
-  border-top: 16px solid darkcyan; /* Blue */
+  border: 16px solid #f3f3f3;
+  border-top: 16px solid darkcyan;
   border-radius: 50%;
   width: 120px;
   height: 120px;

@@ -6,7 +6,7 @@ import { addImageEventListeners } from './imageExpansion.js';
 const recipeUrl = localStorage.getItem('recipeUrl');
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM fully loaded and parsed'); // Debugging log
+  console.log('DOM fully loaded and parsed');
 
   setupHamburgerMenu();
   setupModals();

@@ -310,7 +310,6 @@ p {
 
 @media (min-width: 481px) {
   .substitute-table th:nth-child(5), .substitute-table td:nth-child(5) {
-    /* display: table-cell; Ensure the 5th column behaves like a table cell */
     width: 150px;
   }
 }
@@ -346,7 +345,7 @@ p {
   cursor: pointer;
   height: 40px;
   min-width: 60px;
-  font-weight: bold; /* Ensure the font is bold */
+  font-weight: bold;
 }
 
 #submitIngredientFormButton, #cancelIngredientFormButton, #submitSubstituteFormButton, #cancelSubstituteFormButton {
